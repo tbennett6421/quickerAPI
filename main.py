@@ -30,6 +30,25 @@ async def calculate_frequency(param: str):
         "freq_score_2": y,
     }
 
+@app.get("/whois/{param}")
+async def fetch_whois(param: str):
+    pass
+
+@app.get("/asn/{param}")
+async def fetch_asn(param: str):
+    pass
+
+@app.get("/geoip/{param}")
+async def fetch_geoip(param: str):
+    pass
+
+@app.get("/alexa/{param}")
+async def fetch_alexa(param: str):
+    pass
+
+@app.get("/cisco/{param}")
+async def fetch_cisco(param: str):
+    pass
 
 @app.get("/md5/{param}")
 async def calculate_md5(param: str):
@@ -54,10 +73,16 @@ async def calculate_hashes(param: str):
         "sha256": sha256(param),
     }
 
+@app.get("/threat/{param}")
+async def query_threathunter(param: str):
+    pass
 
 #endregion: routes
 
 #region: stubs
 
+@app.get("/entropy/{param}")
+async def calculate_entropy(param: str):
+    return await calculate_frequency(param)
 
 #endregion: stubs
