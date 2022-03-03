@@ -7,6 +7,7 @@ __code_version__ = 'v0.0.1'
 from fastapi import FastAPI
 
 ## Modules
+from classes.freq import FreqCounter
 from classes.funcs import md5,sha1,sha256
 
 ## run server with
@@ -15,9 +16,19 @@ app = FastAPI()
 
 @app.on_event("startup")
 async def main():
-    print('[*] started')
+    """ On startup, load databases """
+    app.fc = FreqCounter()
+    app.fc.load('resources/freqtable2018.freq')
 
 #region: routes
+
+@app.get("/frequency/{param}")
+async def calculate_frequency(param: str):
+    x,y = app.fc.probability(param)
+    return {
+        "freq_score_1": x,
+        "freq_score_2": y,
+    }
 
 
 @app.get("/md5/{param}")
