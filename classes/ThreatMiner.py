@@ -3,6 +3,7 @@ __code_debug__ = False
 __code_version__ = 'v0.0.0'
 
 ## Standard Libraries
+from pprint import pprint
 from urllib.parse import urljoin
 
 ## Third-Party
@@ -137,15 +138,45 @@ class ThreatMiner(WebClient):
     #region: public interfaces
 
     def queryDomainWhois(self, query):
-        rcode, resp= self._queryDomain(q=query, rt=self.DOMAIN_WHOIS)
-        return rcode, resp
+        _, resp= self._queryDomain(q=query, rt=self.DOMAIN_WHOIS)
+        return resp.json()
+
+    def queryDomainPassiveDNS(self, query):
+        #raise NotImplementedError
+        _, resp= self._queryDomain(q=query, rt=self.DOMAIN_PASV_DNS)
+        return resp.json()
+
+    def queryDomainExampleQuery(self, query):
+        raise NotImplementedError
+        _, resp= self._queryDomain(q=query, rt=self.DOMAIN_EXAMPLE_Q)
+        return resp.json()
+
+    def queryDomainRelatedSamples(self, query):
+        raise NotImplementedError
+        _, resp= self._queryDomain(q=query, rt=self.DOMAIN_RELATED)
+        return resp.json()
+
+    def queryDomainSubDomains(self, query):
+        #raise NotImplementedError
+        _, resp= self._queryDomain(q=query, rt=self.DOMAIN_SUBDOM)
+        return resp.json()
+
+    def queryDomainReportTag(self, query):
+        raise NotImplementedError
+        _, resp= self._queryDomain(q=query, rt=self.DOMAIN_REPORT_TAG)
+        return resp.json()
 
     #endregion: public interfaces
 
 def demo():
     url = "google.com"
     t = ThreatMiner()
-    t.queryDomainWhois(query=url)
+    rjsn = t.queryDomainWhois(query=url)
+    pprint(rjsn)
+    rjsn = t.queryDomainPassiveDNS(query=url)
+    pprint(rjsn)
+    rjsn = t.queryDomainSubDomains(query=url)
+    pprint(rjsn)
 
 def main():
     demo()
