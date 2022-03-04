@@ -3,7 +3,6 @@ __code_debug__ = False
 __code_version__ = 'v0.0.0'
 
 ## Standard Libraries
-import ipaddress
 from pprint import pprint
 from urllib.parse import urljoin
 
@@ -15,6 +14,7 @@ try:
     from .WebClient import WebClient
 except ImportError:
     from WebClient import WebClient
+    from utils import isIPAddress
 
 class ThreatMiner(WebClient):
 
@@ -70,13 +70,6 @@ class ThreatMiner(WebClient):
     def _doQuery(self, url, params):
         return self._doGet(url=url, params=params)
 
-    def _isIPAddress(self, i):
-        try:
-            _ = ipaddress.ip_address(i)
-            return True
-        except ValueError:
-            return False
-
     #endregion: private methods
 
     #region: public methods
@@ -93,7 +86,7 @@ class ThreatMiner(WebClient):
     def _queryIP(self, q=None, rt=None):
         assert q is not None
         assert rt is not None
-        assert self._isIPAddress(q)
+        assert isIPAddress(q)
         stub = 'host.php'
         endpoint = urljoin(self.base_url, stub)
         payload = {'q': q, 'rt': rt}
