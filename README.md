@@ -43,3 +43,8 @@ uvicorn main:app --reload
 The following platforms have been tested. Others may work, feel free to add info if you get it working on other platforms
 * Microsoft Windows 10
 * Mac OS X Big Sur
+
+# Resources
+|Item|Description|
+|---|---|
+| domain.freq | frequency table built using alexa top1m and cisco umbrella top 1m |
