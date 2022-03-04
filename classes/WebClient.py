@@ -193,9 +193,6 @@ class WebClient(BaseObject):
     #region: public interfaces
     #endregion: public interfaces
 
-    #region: public interfaces
-    #endregion: public interfaces
-
 def demo():
     pass
 
