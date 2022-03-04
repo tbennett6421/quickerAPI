@@ -34,6 +34,10 @@ class WebClient(BaseObject):
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         ## Configure TLS
         self._configureTLSValidation(disable_verification=False)
+
+        ## Configure self vars
+        self.acceptable_methods = ['GET', 'POST', 'DELETE', 'PUT']
+
         ## Call parent init
         super().__init__()
 
