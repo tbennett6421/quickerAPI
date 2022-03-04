@@ -28,13 +28,17 @@ class WebClient(BaseObject):
             self._setHTTPLogging()
         else:
             self.log = logging.getLogger(__name__)
+
+        ## Disable TLS errors
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        ## Congiure TLS
+        self._configureTLSValidation(disable_verification=False)
         ## Call parent init
         super().__init__()
 
     """ Ensure keys are set to avoid throwing attributeError, also perform class init """
     def _setProps(self):
         self.is_valid = False
-        self.tls_verify = True
         self.requestSession = requests.Session()
         none_keys = [
             'last_raw_request', 'last_prepared_request', 'last_response',
@@ -51,8 +55,16 @@ class WebClient(BaseObject):
         requests_log.setLevel(logging.DEBUG)
         requests_log.propagate = True
 
-    def configureTLSValidation(self, allowInsecure=False):
-        """ Configure TLS for requests: Where possible use or require TLS validation """
+    """
+        Attempt to detect and configure TLS cert checking, allow caller to override in cases
+        where the TLS for a given system/service is self-signed.
+    """
+    def _configureTLSValidation(self, disable_verification=False):
+        if disable_verification:
+            self.tls_bundle = False
+            self.verify = False
+            return
+
         env_hunt_paths = ["REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE", "SSL_CERT_FILE"]
         file_hunt_paths = [
             "/etc/pki/tls/certs/ca-bundle.crt",         # RHEL
@@ -64,8 +76,9 @@ class WebClient(BaseObject):
         # First attempt to probe environment
         for e in env_hunt_paths:
             try:
-                self.tls_bundle = os.environ["REQUESTS_CA_BUNDLE"]
+                self.tls_bundle = os.environ[e]
                 self.verify = True
+                return
             except KeyError:
                 pass
 
@@ -75,16 +88,14 @@ class WebClient(BaseObject):
                 if os.path.isfile(f):
                     self.tls_bundle = f
                     self.verify = True
+                    return
 
-        # all else fails. allow insecure, or set to system.
+        # all else fails, use system
         if not self.verify:
-            if allowInsecure:
-                self.verify = False
-                self.tls_bundle = False
-            else:
-                self.verify = True
-                self.tls_bundle = True
+            self.verify = True
+            self.tls_bundle = True
 
+        try:
     """ pretty print the request to stdout, called when raise_for_status occurs """
     def _pretty_print_POST(self, req):
         print('{}\n{}\r\n{}\r\n\r\n{}'.format(
