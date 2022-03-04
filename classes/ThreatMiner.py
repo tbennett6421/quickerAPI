@@ -3,6 +3,7 @@ __code_debug__ = False
 __code_version__ = 'v0.0.0'
 
 ## Standard Libraries
+import ipaddress
 from pprint import pprint
 from urllib.parse import urljoin
 
@@ -69,6 +70,13 @@ class ThreatMiner(WebClient):
     def _doQuery(self, url, params):
         return self._doGet(url=url, params=params)
 
+    def _isIPAddress(self, i):
+        try:
+            _ = ipaddress.ip_address(i)
+            return True
+        except ValueError:
+            return False
+
     #endregion: private methods
 
     #region: public methods
@@ -85,11 +93,12 @@ class ThreatMiner(WebClient):
     def _queryIP(self, q=None, rt=None):
         assert q is not None
         assert rt is not None
-        # Check and ensure IP is an IP
-        raise NotImplementedError
+        assert self._isIPAddress(q)
         stub = 'host.php'
         endpoint = urljoin(self.base_url, stub)
         payload = {'q': q, 'rt': rt}
+        rcode, resp = self._doQuery(endpoint, payload)
+        return rcode, resp
         raise NotImplementedError
 
     def _querySamples(self, q=None, rt=None):
@@ -169,38 +178,34 @@ class ThreatMiner(WebClient):
         return resp.json()
 
     def queryIPWhois(self, query):
-        raise NotImplementedError
-        _, resp= self._queryDomain(q=query, rt=self.IP_WHOIS)
+        _, resp= self._queryIP(q=query, rt=self.IP_WHOIS)
         return resp.json()
 
     def queryIPPassiveDNS(self, query):
-        raise NotImplementedError
-        _, resp= self._queryDomain(q=query, rt=self.IP_PASV_DNS)
+        _, resp= self._queryIP(q=query, rt=self.IP_PASV_DNS)
         return resp.json()
 
     def queryIPURIS(self, query):
-        raise NotImplementedError
-        _, resp= self._queryDomain(q=query, rt=self.IP_URIS)
+        _, resp= self._queryIP(q=query, rt=self.IP_URIS)
         return resp.json()
 
     def queryIPRelatedSamples(self, query):
-        raise NotImplementedError
-        _, resp= self._queryDomain(q=query, rt=self.IP_RELATED)
+        _, resp= self._queryIP(q=query, rt=self.IP_RELATED)
         return resp.json()
 
     def queryIPSSLCerts(self, query):
-        raise NotImplementedError
-        _, resp= self._queryDomain(q=query, rt=self.IP_SSLCERTS)
+        _, resp= self._queryIP(q=query, rt=self.IP_SSLCERTS)
         return resp.json()
 
     def queryIPReportTag(self, query):
-        raise NotImplementedError
-        _, resp= self._queryDomain(q=query, rt=self.IP_REPORT_TAG)
+        _, resp= self._queryIP(q=query, rt=self.IP_REPORT_TAG)
         return resp.json()
 
     #endregion: public interfaces
 
 def demo():
+    url='vwrm.com'
+    ip='8.8.8.8'
     t = ThreatMiner()
 
 def main():
