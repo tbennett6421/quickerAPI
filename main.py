@@ -74,23 +74,27 @@ async def calculate_frequency(param: str, table: frequency_tables = frequency_ta
 #async def fetch_cisco(param: str):
 #    pass
 
-@app.get("/md5/{param}", summary="Calculate MD5 for a string")
+@app.get("/md5/{param}")
 async def calculate_md5(param: str):
+    """ Calculate MD5 for a string """
     md = md5(param)
     return { "md5": md }
 
-@app.get("/sha1/{param}", summary="Calculate SHA1 for a string")
+@app.get("/sha1/{param}")
 async def calculate_sha1(param: str):
+    """ Calculate SHA1 for a string """
     md = sha1(param)
     return { "sha1": md }
 
-@app.get("/sha256/{param}", summary="Calculate SHA256 for a string")
+@app.get("/sha256/{param}")
 async def calculate_sha256(param: str):
+    """ Calculate SHA256 for a string """
     md = sha256(param)
     return { "sha256": md }
 
-@app.get("/hashes/{param}", summary="Calculate all message digests supported for a string")
+@app.get("/hashes/{param}")
 async def calculate_hashes(param: str):
+    """ Calculate all message digests supported for a string """
     return {
         "md5": md5(param),
         "sha1": sha1(param),
