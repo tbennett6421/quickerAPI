@@ -1,3 +1,4 @@
+__code_desc__ = "A class wrapping requests providing sessions and logging"
 __code_debug__ = False
 __code_version__ = 'v0.0.0'
 
@@ -31,7 +32,7 @@ class WebClient(BaseObject):
 
         ## Disable TLS errors
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        ## Congiure TLS
+        ## Configure TLS
         self._configureTLSValidation(disable_verification=False)
         ## Call parent init
         super().__init__()
@@ -95,7 +96,6 @@ class WebClient(BaseObject):
             self.verify = True
             self.tls_bundle = True
 
-        try:
     """ pretty print the request to stdout, called when raise_for_status occurs """
     def _pretty_print_POST(self, req):
         print('{}\n{}\r\n{}\r\n\r\n{}'.format(
@@ -135,7 +135,7 @@ class WebClient(BaseObject):
     def _logRequest(self, namespace, obj):
         acceptable_namespaces = ['last_raw_request', 'last_prepared_request', 'last_response']
         if namespace not in acceptable_namespaces:
-            raise ValueError('Error logging requst: invalid namespace: %s' % (str(namespace)))
+            raise ValueError('Error logging request: invalid namespace: %s' % (str(namespace)))
         setattr(self, namespace, obj)
 
     """ Prepare a request, while logging details """
@@ -181,19 +181,15 @@ class WebClient(BaseObject):
             self._pretty_print_POST(self.last_prepared_request)
             raise e
 
-
     #endregion: private methods
 
     #region: public methods
-
     #endregion: public methods
 
     #region: public interfaces
     #endregion: public interfaces
 
     #region: public interfaces
-
-
     #endregion: public interfaces
 
 def demo():
