@@ -10,11 +10,11 @@ rm -f "$TARGET_ZIP"
 mv "$BASE_DIR/top-1m.csv" "$BASE_DIR/top-1m-cisco.csv"
 rm -f "$TARGET_ZIP"
 
-# # Download latest alexa
-# TARGET_ZIP="${BASE_DIR}/top-1m-alexa.csv.zip"
-# rm -f "$TARGET_ZIP"
-# /usr/bin/curl http://s3.amazonaws.com/alexa-static/top-1m.csv.zip > "$TARGET_ZIP"
-# /usr/bin/unzip -o "$TARGET_ZIP" -d "$BASE_DIR/"
-# mv "$BASE_DIR/top-1m.csv" "$BASE_DIR/top-1m-alexa.csv"
-# rm -f "$TARGET_ZIP"
+# Download latest alexa
+TARGET_ZIP="${BASE_DIR}/top-1m-alexa.csv.zip"
+rm -f "$TARGET_ZIP"
+/usr/bin/curl http://s3.amazonaws.com/alexa-static/top-1m.csv.zip > "$TARGET_ZIP"
+/usr/bin/unzip -o "$TARGET_ZIP" -d "$BASE_DIR/"
+mv "$BASE_DIR/top-1m.csv" "$BASE_DIR/top-1m-alexa.csv"
+rm -f "$TARGET_ZIP"
 
