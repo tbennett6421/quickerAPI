@@ -55,14 +55,13 @@ class ThreatMiner(WebClient):
     def __init__(self, loglevel='INFO'):
         self.base_url = 'https://api.threatminer.org/v2/'
         super().__init__()
-        self.demo()
 
     #endregion: internal methods
 
     #region: private methods
     @limits(calls=rate_limit_value, period=rate_limit_period)
-    def _doQuery(self):
-        pass
+    def _doQuery(self, url, params):
+        return self._doGet(url=url, params=params)
 
     #endregion: private methods
 
@@ -74,7 +73,8 @@ class ThreatMiner(WebClient):
         stub = 'domain.php'
         endpoint = urljoin(self.base_url, stub)
         payload = {'q': q, 'rt': rt}
-        raise NotImplementedError
+        rcode, resp = self._doQuery(endpoint, payload)
+        return rcode, resp
 
     def _queryIP(self, q=None, rt=None):
         assert q is not None
@@ -135,10 +135,17 @@ class ThreatMiner(WebClient):
     #endregion: public methods
 
     #region: public interfaces
+
+    def queryDomainWhois(self, query):
+        rcode, resp= self._queryDomain(q=query, rt=self.DOMAIN_WHOIS)
+        return rcode, resp
+
     #endregion: public interfaces
 
 def demo():
-    pass
+    url = "google.com"
+    t = ThreatMiner()
+    t.queryDomainWhois(query=url)
 
 def main():
     demo()
