@@ -10,6 +10,7 @@ from fastapi import FastAPI
 ## Modules
 from classes.freq import FreqCounter
 from classes.funcs import md5,sha1,sha256
+from classes.Enumerations import frequency_tables
 
 ## run server with
 ## uvicorn main:app --reload
@@ -23,17 +24,34 @@ app = FastAPI(
 @app.on_event("startup")
 async def main():
     """ On startup, load databases """
-    app.fc = FreqCounter()
-    app.fc.load('resources/freqtable2018.freq')
+    app.freq = lambda: None
+    app.freq.default = lambda: None
+    app.freq.domain = lambda: None
+    app.freq.default.fc = FreqCounter()
+    app.freq.domain.fc = FreqCounter()
+    app.freq.default.fc.load('resources/freqtable2018.freq')
+    app.freq.domain.fc.load('resources/domain.freq')
 
 #region: routes
 
 @app.get("/frequency/{param}")
-async def calculate_frequency(param: str):
-    x,y = app.fc.probability(param)
+async def calculate_frequency(param: str, table: frequency_tables = frequency_tables.default):
+    """
+    Calculate the frequency score for some input using character pair frequency analysis:
+
+    Lower scores are more likely to be high-entropy
+
+    Two scores are returned
+    - **average probability**
+    - **word probability**
+    """
+    if table == frequency_tables.domain:
+        x,y = app.freq.domain.fc.probability(param)
+    else:
+        x,y = app.freq.default.fc.probability(param)
     return {
-        "freq_score_1": x,
-        "freq_score_2": y,
+        "freq_score_avg": x,
+        "freq_score_word": y,
     }
 
 #@app.get("/whois/{param}")
