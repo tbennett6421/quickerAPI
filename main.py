@@ -5,7 +5,7 @@ __code_version__ = 'v0.0.1'
 ## Standard Libraries
 
 ## Third Party libraries
-import pyasn
+from pyasn import pyasn
 from fastapi import FastAPI
 
 ## Modules
@@ -32,7 +32,7 @@ async def main():
     app.freq.domain.fc = FreqCounter()
     app.freq.default.fc.load('resources/freqtable2018.freq')
     app.freq.domain.fc.load('resources/domain.freq')
-    app.asn = pyasn.pyasn('resources/ipasn.dat')
+    app.asn = pyasn('resources/ipasn.dat')
 
 #region: routes
 
