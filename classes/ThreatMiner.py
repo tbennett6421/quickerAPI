@@ -17,6 +17,11 @@ except ImportError:
 
 class ThreatMiner(WebClient):
 
+    """
+        Anything that raises NotImplementedError has either
+        not been tested yet... or is unfinished
+    """
+
     # rating limiting variables
     rate_limit_value = 10
     rate_limit_period = 60
@@ -80,6 +85,8 @@ class ThreatMiner(WebClient):
     def _queryIP(self, q=None, rt=None):
         assert q is not None
         assert rt is not None
+        # Check and ensure IP is an IP
+        raise NotImplementedError
         stub = 'host.php'
         endpoint = urljoin(self.base_url, stub)
         payload = {'q': q, 'rt': rt}
@@ -142,41 +149,59 @@ class ThreatMiner(WebClient):
         return resp.json()
 
     def queryDomainPassiveDNS(self, query):
-        #raise NotImplementedError
         _, resp= self._queryDomain(q=query, rt=self.DOMAIN_PASV_DNS)
         return resp.json()
 
     def queryDomainExampleQuery(self, query):
-        raise NotImplementedError
         _, resp= self._queryDomain(q=query, rt=self.DOMAIN_EXAMPLE_Q)
         return resp.json()
 
     def queryDomainRelatedSamples(self, query):
-        raise NotImplementedError
         _, resp= self._queryDomain(q=query, rt=self.DOMAIN_RELATED)
         return resp.json()
 
     def queryDomainSubDomains(self, query):
-        #raise NotImplementedError
         _, resp= self._queryDomain(q=query, rt=self.DOMAIN_SUBDOM)
         return resp.json()
 
     def queryDomainReportTag(self, query):
-        raise NotImplementedError
         _, resp= self._queryDomain(q=query, rt=self.DOMAIN_REPORT_TAG)
+        return resp.json()
+
+    def queryIPWhois(self, query):
+        raise NotImplementedError
+        _, resp= self._queryDomain(q=query, rt=self.IP_WHOIS)
+        return resp.json()
+
+    def queryIPPassiveDNS(self, query):
+        raise NotImplementedError
+        _, resp= self._queryDomain(q=query, rt=self.IP_PASV_DNS)
+        return resp.json()
+
+    def queryIPURIS(self, query):
+        raise NotImplementedError
+        _, resp= self._queryDomain(q=query, rt=self.IP_URIS)
+        return resp.json()
+
+    def queryIPRelatedSamples(self, query):
+        raise NotImplementedError
+        _, resp= self._queryDomain(q=query, rt=self.IP_RELATED)
+        return resp.json()
+
+    def queryIPSSLCerts(self, query):
+        raise NotImplementedError
+        _, resp= self._queryDomain(q=query, rt=self.IP_SSLCERTS)
+        return resp.json()
+
+    def queryIPReportTag(self, query):
+        raise NotImplementedError
+        _, resp= self._queryDomain(q=query, rt=self.IP_REPORT_TAG)
         return resp.json()
 
     #endregion: public interfaces
 
 def demo():
-    url = "google.com"
     t = ThreatMiner()
-    rjsn = t.queryDomainWhois(query=url)
-    pprint(rjsn)
-    rjsn = t.queryDomainPassiveDNS(query=url)
-    pprint(rjsn)
-    rjsn = t.queryDomainSubDomains(query=url)
-    pprint(rjsn)
 
 def main():
     demo()
