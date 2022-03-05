@@ -146,13 +146,35 @@ async def fetch_asn(ip_address: str):
 #async def fetch_geoip(param: str):
 #    pass
 
-#@app.get("/alexa/{param}")
-#async def fetch_alexa(param: str):
-#    pass
+@app.get("/alexa/{param}")
+async def fetch_alexa(param: str):
+    if app.alexa is not None:
+        try:
+            df = app.alexa
+            capture = df.loc[df['domain'] == param]
+            rval = int(capture['rank'].values[0])
+            return {
+                'alexa_score': rval
+            }
+        except IndexError:
+            raise HTTPException(status_code=404, detail="item not found")
+    else:
+        raise HTTPException(status_code=500, detail="alexa not loaded")
 
-#@app.get("/cisco/{param}")
-#async def fetch_cisco(param: str):
-#    pass
+@app.get("/cisco/{param}")
+async def fetch_cisco(param: str):
+    if app.cisco is not None:
+        try:
+            df = app.cisco
+            capture = df.loc[df['domain'] == param]
+            rval = int(capture['rank'].values[0])
+            return {
+                'cisco_score': rval
+            }
+        except IndexError:
+            raise HTTPException(status_code=404, detail="item not found")
+    else:
+        raise HTTPException(status_code=500, detail="cisco umbrella not loaded")
 
 @app.get("/md5/{param}")
 async def calculate_md5(param: str):
