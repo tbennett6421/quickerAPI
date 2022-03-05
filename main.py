@@ -6,7 +6,7 @@ __code_version__ = 'v0.0.1'
 
 ## Third Party libraries
 from pyasn import pyasn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 ## Modules
 from classes.freq import FreqCounter
@@ -20,6 +20,10 @@ app = FastAPI(
     description=__code_desc__,
     version=__code_version__,
 )
+
+def log_exception(e):
+    # @todo: implement logging
+    print(f"Caught Exception type({type(e)}) => {e}")
 
 
 @app.on_event("startup")
@@ -47,14 +51,18 @@ async def calculate_frequency(param: str, table: frequency_tables = frequency_ta
     - **average probability**
     - **word probability**
     """
-    if table == frequency_tables.domain:
-        x,y = app.freq.domain.fc.probability(param)
-    else:
-        x,y = app.freq.default.fc.probability(param)
-    return {
-        "freq_score_avg": x,
-        "freq_score_word": y,
-    }
+    try:
+        if table == frequency_tables.domain:
+            x,y = app.freq.domain.fc.probability(param)
+        else:
+            x,y = app.freq.default.fc.probability(param)
+        return {
+            "freq_score_avg": x,
+            "freq_score_word": y,
+        }
+    except Exception as e:
+        log_exception(e)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 #@app.get("/whois/{param}")
 #async def fetch_whois(param: str):
@@ -62,11 +70,14 @@ async def calculate_frequency(param: str, table: frequency_tables = frequency_ta
 
 @app.get("/asn/{ip_address}", summary="Fetch ASN")
 async def fetch_asn(ip_address: str):
-    x, y = app.asn.lookup(ip_address)
-    return {
-        "asn": x,
-        "bgp_prefix": y,
-    }
+    try:
+        x, y = app.asn.lookup(ip_address)
+        return {
+            "asn": x,
+            "bgp_prefix": y,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail="item not found")
 
 #@app.get("/geoip/{param}")
 #async def fetch_geoip(param: str):
