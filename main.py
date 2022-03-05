@@ -3,6 +3,7 @@ __code_desc__ = "A POC/Learning exercise with FastAPI"
 __code_version__ = 'v0.0.1'
 
 ## Standard Libraries
+from pprint import pprint
 
 ## Third Party libraries
 import pandas as pd
