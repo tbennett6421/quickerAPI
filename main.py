@@ -34,9 +34,19 @@ async def main():
     app.freq.domain = lambda: None
     app.freq.default.fc = FreqCounter()
     app.freq.domain.fc = FreqCounter()
-    app.freq.default.fc.load('resources/freqtable2018.freq')
-    app.freq.domain.fc.load('resources/domain.freq')
-    app.asn = pyasn('resources/ipasn.dat')
+    try:
+        app.freq.default.fc.load('resources/freqtable2018.freq')
+    except (FileNotFoundError,OSError) as e:
+        app.freq.default = None
+    try:
+        app.freq.domain.fc.load('resources/domain.freq')
+    except (FileNotFoundError,OSError) as e:
+        app.freq.domain = None
+    try:
+        app.asn = pyasn('resources/ipasn.dat')
+    except (FileNotFoundError,OSError) as e:
+        app.asn = None
+
 
 #region: routes
 
@@ -53,16 +63,27 @@ async def calculate_frequency(param: str, table: frequency_tables = frequency_ta
     """
     try:
         if table == frequency_tables.domain:
-            x,y = app.freq.domain.fc.probability(param)
+            if app.freq.domain is not None:
+                x,y = app.freq.domain.fc.probability(param)
+            else:
+                raise HTTPException(status_code=500, detail="freq::domain not loaded")
         else:
-            x,y = app.freq.default.fc.probability(param)
+            if app.freq.default is not None:
+                x,y = app.freq.default.fc.probability(param)
+            else:
+                raise HTTPException(status_code=500, detail="freq::default not loaded")
         return {
             "freq_score_avg": x,
             "freq_score_word": y,
         }
     except Exception as e:
-        log_exception(e)
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        # Re-raise any HTTPExceptions
+        if type(e) == HTTPException:
+            raise e
+        # Otherwise log it for review and return generic
+        else:
+            log_exception(e)
+            raise HTTPException(status_code=500, detail="Internal Server Error")
 
 #@app.get("/whois/{param}")
 #async def fetch_whois(param: str):
