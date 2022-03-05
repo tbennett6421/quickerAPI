@@ -60,9 +60,13 @@ async def calculate_frequency(param: str, table: frequency_tables = frequency_ta
 #async def fetch_whois(param: str):
 #    pass
 
-#@app.get("/asn/{param}")
-#async def fetch_asn(param: str):
-#    pass
+@app.get("/asn/{ip_address}", summary="Fetch ASN")
+async def fetch_asn(ip_address: str):
+    x, y = app.asn.lookup(ip_address)
+    return {
+        "asn": x,
+        "bgp_prefix": y,
+    }
 
 #@app.get("/geoip/{param}")
 #async def fetch_geoip(param: str):
