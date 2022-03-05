@@ -130,14 +130,17 @@ async def calculate_frequency(param: str, table: frequency_tables = frequency_ta
 
 @app.get("/asn/{ip_address}", summary="Fetch ASN")
 async def fetch_asn(ip_address: str):
-    try:
-        x, y = app.asn.lookup(ip_address)
-        return {
-            "asn": x,
-            "bgp_prefix": y,
-        }
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail="item not found")
+    if app.asn is not None:
+        try:
+            x, y = app.asn.lookup(ip_address)
+            return {
+                "asn": x,
+                "bgp_prefix": y,
+            }
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail="item not found")
+    else:
+        raise HTTPException(status_code=500, detail="asn database not loaded")
 
 #@app.get("/geoip/{param}")
 #async def fetch_geoip(param: str):
