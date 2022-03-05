@@ -47,6 +47,29 @@ def log_exception(e):
     # @todo: implement logging
     print(f"Caught Exception type({type(e)}) => {e}")
 
+def load_1m_list(filename):
+    data = pd.read_csv(filename, names=['rank', 'domain'])
+    return data
+
+def load_alexa(filename):
+    try:
+        alexa = load_1m_list(filename)
+        return alexa
+    except FileNotFoundError as e:
+        log_exception(e)
+        return None
+    except Exception as e:
+        log_exception(e)
+
+def load_cisco(filename):
+    try:
+        cisco = load_1m_list(filename)
+        return cisco
+    except FileNotFoundError as e:
+        log_exception(e)
+        return None
+    except Exception as e:
+        log_exception(e)
 
 @app.on_event("startup")
 async def main():
