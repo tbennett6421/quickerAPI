@@ -99,6 +99,12 @@ async def calculate_frequency(param: str, table: frequency_tables = frequency_ta
     Two scores are returned
     - **average probability**
     - **word probability**
+
+    Return Codes
+    - 200: Success
+    - 500: Freq table not loaded
+    - 500: Unknown Error
+
     """
     try:
         if table == frequency_tables.domain:
@@ -130,6 +136,14 @@ async def calculate_frequency(param: str, table: frequency_tables = frequency_ta
 
 @app.get("/asn/{ip_address}", summary="Fetch ASN")
 async def fetch_asn(ip_address: str):
+    """
+    Return the ASN and BGP-Prefix of an ip address:
+
+    Return Codes
+    - 200: Success
+    - 404: Not found
+    - 500: ASN database is not loaded
+    """
     if app.asn is not None:
         try:
             x, y = app.asn.lookup(ip_address)
@@ -148,6 +162,15 @@ async def fetch_asn(ip_address: str):
 
 @app.get("/alexa/{param}")
 async def fetch_alexa(param: str):
+    """
+    Return the ranking of the input according to the alexa top 1 million records:
+
+    Return Codes
+    - 200: Success
+    - 404: Not found
+    - 500: Alexa database is not loaded
+    """
+
     if app.alexa is not None:
         try:
             df = app.alexa
@@ -163,6 +186,15 @@ async def fetch_alexa(param: str):
 
 @app.get("/cisco/{param}")
 async def fetch_cisco(param: str):
+    """
+    Return the ranking of the input according to the cisco umbrella top 1 million records:
+
+    Return Codes
+    - 200: Success
+    - 404: Not found
+    - 500: Cisco database is not loaded
+    """
+
     if app.cisco is not None:
         try:
             df = app.cisco
