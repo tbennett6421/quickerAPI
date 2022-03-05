@@ -15,8 +15,6 @@ from classes.freq import FreqCounter
 from classes.funcs import md5,sha1,sha256
 from classes.Enumerations import frequency_tables
 
-## run server with
-## uvicorn main:app --reload
 app = FastAPI(
     title=__code_project__,
     description=__code_desc__,
@@ -75,7 +73,7 @@ def load_cisco(filename):
 @app.on_event("startup")
 async def main():
     """ On startup, load databases """
-    ## Configure andas display
+    ## Configure pandas display
     pd.set_option('display.max_rows', 5)
     pd.set_option('display.max_columns', 5)
     pd.set_option('display.width', 1000)
