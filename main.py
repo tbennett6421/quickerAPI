@@ -11,9 +11,10 @@ from pyasn import pyasn
 from fastapi import FastAPI, HTTPException
 
 ## Modules
+from classes.ThreatMiner import ThreatMiner
+from classes.Enumerations import frequency_tables,whois_method,whois_artifact
 from classes.freq import FreqCounter
 from classes.funcs import md5,sha1,sha256
-from classes.Enumerations import frequency_tables
 from classes.utils import log_health,log_exception,load_alexa,load_cisco
 
 app = FastAPI(
@@ -24,7 +25,7 @@ app = FastAPI(
 
 @app.on_event("startup")
 async def main():
-    """ On startup, load databases """
+    """ On startup, load components """
     ## Configure pandas display
     pd.set_option('display.max_rows', 5)
     pd.set_option('display.max_columns', 5)
@@ -32,6 +33,7 @@ async def main():
     pd.set_option('display.colheader_justify', 'center')
     pd.set_option('display.precision', 3)
 
+    # load database services
     app.freq = lambda: None
     app.freq.default = lambda: None
     app.freq.domain = lambda: None
@@ -57,6 +59,9 @@ async def main():
         app.cisco = load_cisco('resources/top-1m-cisco.csv')
     except (FileNotFoundError,OSError) as e:
         app.cisco = None
+
+    # Instantiate api services
+    app.threatminer = ThreatMiner()
 
     # finished loading; dump services to stdout
     log_health(app)
@@ -104,10 +109,18 @@ async def calculate_frequency(param: str, table: frequency_tables = frequency_ta
             log_exception(e)
             raise HTTPException(status_code=500, detail="Internal Server Error")
 
-# @app.get("/whois/{param}")
-# async def fetch_whois(param: str):
-#     raise HTTPException(status_code=501, detail="Not implemented yet")
-#     return {}
+@app.get("/whois/{param}")
+async def fetch_whois(q: str, artifact_type: whois_artifact = whois_artifact.default, method: whois_method = whois_method.default):
+    if method == whois_method.threatminer:
+        if artifact_type == whois_artifact.ip:
+            return app.threatminer.queryIPWhois(q)
+        elif artifact_type == whois_artifact.domain:
+            return app.threatminer.queryDomainWhois(q)
+        else:
+            # attempt to guess at type
+            raise HTTPException(status_code=501, detail="Not implemented yet")
+    else:
+        raise HTTPException(status_code=501, detail="Not implemented yet")
 
 @app.get("/asn/{ip_address}", summary="Fetch ASN")
 async def fetch_asn(ip_address: str):

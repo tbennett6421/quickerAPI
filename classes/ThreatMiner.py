@@ -8,10 +8,12 @@ from urllib.parse import urljoin
 
 ## Third-Party
 from ratelimit import limits#, RateLimitException
+from fastapi import HTTPException
 
 ## Modules
 try:
     from .WebClient import WebClient
+    from .utils import isIPAddress
 except ImportError:
     from WebClient import WebClient
     from utils import isIPAddress
@@ -86,7 +88,8 @@ class ThreatMiner(WebClient):
     def _queryIP(self, q=None, rt=None):
         assert q is not None
         assert rt is not None
-        assert isIPAddress(q)
+        if not isIPAddress(q):
+            raise HTTPException(status_code=400, detail="Not an IP Address")
         stub = 'host.php'
         endpoint = urljoin(self.base_url, stub)
         payload = {'q': q, 'rt': rt}

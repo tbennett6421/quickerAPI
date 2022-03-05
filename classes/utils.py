@@ -4,7 +4,7 @@ import ipaddress
 ## Third Party libraries
 import pandas as pd
 
-def isIPAddress(self, i):
+def isIPAddress(i):
     try:
         _ = ipaddress.ip_address(i)
         return True
