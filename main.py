@@ -5,6 +5,7 @@ __code_version__ = 'v0.0.1'
 ## Standard Libraries
 
 ## Third Party libraries
+import pandas as pd
 from pyasn import pyasn
 from fastapi import FastAPI, HTTPException
 
@@ -21,6 +22,27 @@ app = FastAPI(
     version=__code_version__,
 )
 
+def is_none(x):
+    if isinstance(x, type(None)):
+        return True
+    else:
+        return False
+
+def is_service_alive(x):
+    x = is_none(x)
+    if x:
+        return False
+    else:
+        return True
+
+def log_health(app):
+    print("===Service Health===")
+    print(f"freq::default  => {is_service_alive(app.freq.default)}")
+    print(f"freq::domain   => {is_service_alive(app.freq.domain)}")
+    print(f"asn            => {is_service_alive(app.asn)}")
+    print(f"alexa          => {is_service_alive(app.alexa)}")
+    print(f"cisco          => {is_service_alive(app.cisco)}")
+
 def log_exception(e):
     # @todo: implement logging
     print(f"Caught Exception type({type(e)}) => {e}")
@@ -29,6 +51,13 @@ def log_exception(e):
 @app.on_event("startup")
 async def main():
     """ On startup, load databases """
+    ## Configure andas display
+    pd.set_option('display.max_rows', 5)
+    pd.set_option('display.max_columns', 5)
+    pd.set_option('display.width', 1000)
+    pd.set_option('display.colheader_justify', 'center')
+    pd.set_option('display.precision', 3)
+
     app.freq = lambda: None
     app.freq.default = lambda: None
     app.freq.domain = lambda: None
@@ -46,7 +75,17 @@ async def main():
         app.asn = pyasn('resources/ipasn.dat')
     except (FileNotFoundError,OSError) as e:
         app.asn = None
+    try:
+        app.alexa = load_alexa('resources/top-1m-alexa.csv')
+    except (FileNotFoundError,OSError) as e:
+        app.alexa = None
+    try:
+        app.cisco = load_cisco('resources/top-1m-cisco.csv')
+    except (FileNotFoundError,OSError) as e:
+        app.cisco = None
 
+    # finished loading; dump services to stdout
+    log_health(app)
 
 #region: routes
 
