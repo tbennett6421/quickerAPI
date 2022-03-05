@@ -279,8 +279,8 @@ async def calculate_hashes(param: str):
 
 #region: stubs
 
-@app.get("/entropy/{param}")
-async def calculate_entropy(param: str):
-    return await calculate_frequency(param)
+#@app.get("/entropy/{param}")
+#async def calculate_entropy(param: str):
+#    return await calculate_frequency(param)
 
 #endregion: stubs
