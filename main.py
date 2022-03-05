@@ -153,9 +153,10 @@ async def calculate_frequency(param: str, table: frequency_tables = frequency_ta
             log_exception(e)
             raise HTTPException(status_code=500, detail="Internal Server Error")
 
-#@app.get("/whois/{param}")
-#async def fetch_whois(param: str):
-#    pass
+# @app.get("/whois/{param}")
+# async def fetch_whois(param: str):
+#     raise HTTPException(status_code=501, detail="Not implemented yet")
+#     return {}
 
 @app.get("/asn/{ip_address}", summary="Fetch ASN")
 async def fetch_asn(ip_address: str):
@@ -181,7 +182,8 @@ async def fetch_asn(ip_address: str):
 
 #@app.get("/geoip/{param}")
 #async def fetch_geoip(param: str):
-#    pass
+#     raise HTTPException(status_code=501, detail="Not implemented yet")
+#     return {}
 
 @app.get("/alexa/{param}")
 async def fetch_alexa(param: str):
@@ -260,23 +262,18 @@ async def calculate_hashes(param: str):
 
 # @app.get("/ip/{param}")
 # async def query_x(param: str):
-#     return {
-#         "md5": md5(param),
-#         "sha1": sha1(param),
-#         "sha256": sha256(param),
-#     }
+#     raise HTTPException(status_code=501, detail="Not implemented yet")
+#     return {}
 
 # @app.get("/domain/{param}")
 # async def query_x(param: str):
-#     return {
-#         "md5": md5(param),
-#         "sha1": sha1(param),
-#         "sha256": sha256(param),
-#     }
+#     raise HTTPException(status_code=501, detail="Not implemented yet")
+#     return {}
 
 #@app.get("/threat/{param}")
 #async def query_threathunter(param: str):
-#    pass
+#     raise HTTPException(status_code=501, detail="Not implemented yet")
+#     return {}
 
 #endregion: routes
 
