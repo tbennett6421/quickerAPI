@@ -31,6 +31,8 @@ def log_health(app):
     print(f"asn            => {is_service_alive(app.asn)}")
     print(f"alexa          => {is_service_alive(app.alexa)}")
     print(f"cisco          => {is_service_alive(app.cisco)}")
+    print(f"ip_whois       => {is_service_alive(app.ip_whois)}")
+    print(f"dns_whois      => {is_service_alive(app.dns_whois)}")
 
 def log_exception(e):
     # @todo: implement logging

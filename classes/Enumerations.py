@@ -7,6 +7,7 @@ class frequency_tables(str, Enum):
 
 class whois_method(str, Enum):
     default = "default"
+    whois = "whois"
     threatminer = "threatminer"
 
 class whois_artifact(str, Enum):

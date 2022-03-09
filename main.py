@@ -9,6 +9,8 @@ from pprint import pprint
 import pandas as pd
 from pyasn import pyasn
 from fastapi import FastAPI, HTTPException
+from whois import whois
+from ipwhois import IPWhois
 
 ## Modules
 from classes.ThreatMiner import ThreatMiner
@@ -59,6 +61,10 @@ async def main():
         app.cisco = load_cisco('resources/top-1m-cisco.csv')
     except (FileNotFoundError,OSError) as e:
         app.cisco = None
+
+    # Instantiate network services
+    app.dns_whois = whois
+    app.ip_whois = IPWhois
 
     # Instantiate api services
     app.threatminer = ThreatMiner()
@@ -111,6 +117,16 @@ async def calculate_frequency(param: str, table: frequency_tables = frequency_ta
 
 @app.get("/whois/{param}")
 async def fetch_whois(q: str, artifact_type: whois_artifact = whois_artifact.default, method: whois_method = whois_method.default):
+    # @to-do: auto-detect artifact type
+    # whois_method.whois is a online lookup from whois binary
+    if method == whois_method.whois:
+        if artifact_type == whois_artifact.ip:
+            obj = app.ip_whois(q)
+            rval = obj.lookup_rdap()
+            return rval
+        if artifact_type == whois_artifact.domain:
+            rval = app.dns_whois(q)
+            return rval
     if method == whois_method.threatminer:
         if artifact_type == whois_artifact.ip:
             return app.threatminer.queryIPWhois(q)
