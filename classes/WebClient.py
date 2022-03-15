@@ -1,12 +1,13 @@
 __code_desc__ = "A class wrapping requests providing sessions and logging"
 __code_debug__ = False
-__code_version__ = 'v1.0.0'
+__code_version__ = 'v1.1.0'
 
 ## Standard Libraries
 import os
 import logging
 import copy
 from datetime import datetime
+from json.decoder import JSONDecodeError
 import http.client as http_client
 
 ## Third-Party
@@ -126,6 +127,9 @@ class WebClient(BaseObject):
             self.verify = True
             self.tls_bundle = True
 
+    def _headers_to_string(self, headers):
+        return '\r\n'.join('{}: {}'.format(k, v) for k, v in headers.items())
+
     """ deepcopy headers, redact sensitive, and return copy """
     def _redact_sensitive_headers(self, req_headers):
         # Use common sensitive headers if none have been provided.
@@ -145,15 +149,42 @@ class WebClient(BaseObject):
             return req_headers
 
     """ pretty print the request to stdout, called when raise_for_status occurs """
-    def _pretty_print_POST(self, req):
-        # redact passwords or sensitive things
-        headers = self._redact_sensitive_headers(req.headers)
-        print('{}\n{}\r\n{}\r\n\r\n{}'.format(
-            '-----------START-----------',
-            req.method + ' ' + req.url,
-            '\r\n'.join('{}: {}'.format(k, v) for k, v in headers.items()),
-            req.body,
-        ))
+    def _pretty_print_web_trace(self):
+        print(" --- Last Prepared Request ---")
+        lpq = self.last_prepared_request
+        headers = self._redact_sensitive_headers(lpq.headers)
+        lpq_payload = (
+            '{method} {url}\r\n'
+            '{headers}\r\n'
+            '\r\n{body}'
+        ).format(
+            method = lpq.method, url = lpq.url,
+            headers=self._headers_to_string(headers),
+            body=lpq.body
+        )
+        print(lpq_payload)
+        print()
+
+        print(" --- Last Response ---")
+        lr = self.last_response
+        try:
+            body = lr.json()
+        except JSONDecodeError:
+            body = lr.text
+        headers = self._redact_sensitive_headers(lr.headers)
+        lr_payload = (
+            '[{status_code}] ({reason}) {url}\r\n'
+            '{headers}\r\n'
+            '\r\n{body}'
+        ).format(
+            status_code = lr.status_code, reason = lr.reason, url = lr.url,
+            headers=self._headers_to_string(headers),
+            body=body
+        )
+        print(lr_payload)
+        print()
+
+        return lpq_payload, lr_payload
 
     def _getTS(format=None):
         assert format in ['utc', 'local']
@@ -234,14 +265,12 @@ class WebClient(BaseObject):
             return response.status_code, response
 
         except requests.exceptions.HTTPError as e:
-            print('[!!] Caught HTTPError')
-            print(e)
-            self._pretty_print_POST(self.last_prepared_request)
+            print('[!!] Caught %s' % (type(e)))
+            last_query, last_response = self._pretty_print_web_trace()
             raise e
         except requests.exceptions.RequestException as e:
-            print('[!!] Caught RequestException')
-            print(e)
-            self._pretty_print_POST(self.last_prepared_request)
+            print('[!!] Caught %s' % (type(e)))
+            last_query, last_response = self._pretty_print_web_trace()
             raise e
 
     #endregion: private methods
