@@ -1,10 +1,11 @@
 __code_desc__ = "A class wrapping requests providing sessions and logging"
 __code_debug__ = False
-__code_version__ = 'v0.0.0'
+__code_version__ = 'v1.0.0'
 
 ## Standard Libraries
 import os
 import logging
+import copy
 from datetime import datetime
 import http.client as http_client
 
@@ -19,6 +20,28 @@ except ImportError:
     from BuildingBlocks import BaseObject
 
 class WebClient(BaseObject):
+    """
+        WebClient is intended to wrap the requests library and provide sessions,
+        logging, and prepared handling of requests. You should subclass this module
+        and implement your own calls on top of it.
+
+        an example of this may look like this
+
+        def authenticate(self, usernm, passwd):
+            url = 'https://www.example.com/login.php'
+            headers = { 'Content-Type': "application/x-www-form-urlencoded" }
+            payload = {
+                'username': self.username,
+                'password': self.password,
+            }
+            rcode, resp = self._doPost(url=url, headers=headers, data=payload)
+            rjsn = resp.json()
+            token = rjsn['sessionKey']
+            return token
+
+        token = client.authenticate('something', 'something')
+
+    """
 
     #region: internal methods
 
@@ -31,13 +54,15 @@ class WebClient(BaseObject):
         else:
             self.log = logging.getLogger(__name__)
 
-        ## Disable TLS errors
+        ## Disable TLS warnings
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         ## Configure TLS
         self._configureTLSValidation(disable_verification=False)
 
         ## Configure self vars
         self.acceptable_methods = ['GET', 'POST', 'DELETE', 'PUT']
+        self.sensitive_headers = []
+        self.common_sensitive_headers = ['Authorization', 'X-OpenIDM-Password']
 
         ## Call parent init
         super().__init__()
@@ -101,8 +126,28 @@ class WebClient(BaseObject):
             self.verify = True
             self.tls_bundle = True
 
+    """ deepcopy headers, redact sensitive, and return copy """
+    def _redact_sensitive_headers(self, req_headers):
+        # Use common sensitive headers if none have been provided.
+        if len(self.sensitive_headers) == 0:
+            sensitive = self.common_sensitive_headers
+        else:
+            sensitive = self.sensitive_headers
+
+        try:
+            headers = copy.deepcopy(req_headers)
+            for item in sensitive:
+                if item in headers:
+                    headers[item] = "[REDACTED]"
+            return headers
+        # No sensitive_headers, return
+        except AttributeError:
+            return req_headers
+
     """ pretty print the request to stdout, called when raise_for_status occurs """
     def _pretty_print_POST(self, req):
+        # redact passwords or sensitive things
+        headers = self._redact_sensitive_headers(req.headers)
         print('{}\n{}\r\n{}\r\n\r\n{}'.format(
             '-----------START-----------',
             req.method + ' ' + req.url,
