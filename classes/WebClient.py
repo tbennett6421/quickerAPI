@@ -5,6 +5,7 @@ __code_version__ = 'v0.0.0'
 ## Standard Libraries
 import os
 import logging
+from datetime import datetime
 import http.client as http_client
 
 ## Third-Party
@@ -109,6 +110,19 @@ class WebClient(BaseObject):
             req.body,
         ))
 
+    def _getTS(format=None):
+        assert format in ['utc', 'local']
+        if format == 'utc':
+            return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        if format == 'local':
+            return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    def _getTimeStampUTC(self):
+        return self.getTS(format='utc')
+
+    def _getTimeStampLocal(self):
+        return self.getTS(format='local')
+
     #endregion: internal methods
 
     #region: private methods
@@ -188,7 +202,23 @@ class WebClient(BaseObject):
     #endregion: private methods
 
     #region: public methods
+
+    """ Mimick datetime functions """
+    def now(self):
+        return self._getTimeStampLocal()
+
+    """ Mimick datetime functions """
+    def utcnow(self):
+        return self._getTimeStampUTC()
+
+    """ Mimick datetime functions """
+    def utc(self):
+        return self._getTimeStampUTC()
+
     #endregion: public methods
+
+    #region: public interfaces
+    #endregion: public interfaces
 
     #region: public interfaces
     #endregion: public interfaces
