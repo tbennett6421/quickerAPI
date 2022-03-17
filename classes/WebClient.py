@@ -1,6 +1,6 @@
 __code_desc__ = "A class wrapping requests providing sessions and logging"
 __code_debug__ = False
-__code_version__ = 'v1.1.2'
+__code_version__ = 'v1.1.3'
 
 ## Standard Libraries
 import os
@@ -329,11 +329,11 @@ class WebClient(BaseObject):
 
         except requests.exceptions.HTTPError as e:
             print('[!!] Caught %s' % (type(e)))
-            last_query, last_response = self._pretty_print_web_trace()
+            rval = self._pretty_print_web_trace()
             raise e
         except requests.exceptions.RequestException as e:
             print('[!!] Caught %s' % (type(e)))
-            last_query, last_response = self._pretty_print_web_trace()
+            rval = self._pretty_print_web_trace()
             raise e
 
     #endregion: private methods
