@@ -1,6 +1,6 @@
 __code_desc__ = "A class wrapping requests providing sessions and logging"
 __code_debug__ = False
-__code_version__ = 'v1.1.0'
+__code_version__ = 'v1.1.2'
 
 ## Standard Libraries
 import os
@@ -8,6 +8,7 @@ import logging
 import copy
 from datetime import datetime
 from json.decoder import JSONDecodeError
+from pprint import pprint
 import http.client as http_client
 
 ## Third-Party
@@ -150,41 +151,103 @@ class WebClient(BaseObject):
 
     """ pretty print the request to stdout, called when raise_for_status occurs """
     def _pretty_print_web_trace(self):
-        print(" --- Last Prepared Request ---")
-        lpq = self.last_prepared_request
-        headers = self._redact_sensitive_headers(lpq.headers)
-        lpq_payload = (
-            '{method} {url}\r\n'
-            '{headers}\r\n'
-            '\r\n{body}'
-        ).format(
-            method = lpq.method, url = lpq.url,
-            headers=self._headers_to_string(headers),
-            body=lpq.body
-        )
-        print(lpq_payload)
-        print()
-
-        print(" --- Last Response ---")
-        lr = self.last_response
+        ret = {}
         try:
-            body = lr.json()
-        except JSONDecodeError:
-            body = lr.text
-        headers = self._redact_sensitive_headers(lr.headers)
-        lr_payload = (
-            '[{status_code}] ({reason}) {url}\r\n'
-            '{headers}\r\n'
-            '\r\n{body}'
-        ).format(
-            status_code = lr.status_code, reason = lr.reason, url = lr.url,
-            headers=self._headers_to_string(headers),
-            body=body
-        )
-        print(lr_payload)
-        print()
+            print(" --- Last Raw Request ---")
+            lpq = self.last_raw_request
+            headers = self._redact_sensitive_headers(lpq.headers)
+            try:
+                body=lpq.body
+            except AttributeError:
+                body = ""
 
-        return lpq_payload, lr_payload
+            lpq_payload = (
+                '{method} {url}\r\n'
+                '{headers}\r\n'
+                '\r\n{body}'
+            ).format(
+                method = lpq.method, url = lpq.url,
+                headers=self._headers_to_string(headers),
+                body=body
+            )
+            ret['last_raw_request'] = lpq_payload
+            print(lpq_payload)
+            print()
+        except AttributeError as e:
+            msg = f"Caught {e.__class__.__name__}"
+            self.log.error(msg)
+            pprint(e)
+            raise e
+        except Exception as e:
+            msg = f"Caught {e.__class__.__name__}"
+            self.log.error(msg)
+            pprint(e)
+            raise e
+
+        try:
+            print(" --- Last Prepared Request ---")
+            lpq = self.last_prepared_request
+            headers = self._redact_sensitive_headers(lpq.headers)
+            try:
+                body=lpq.body
+            except AttributeError:
+                body = ""
+            lpq_payload = (
+                '{method} {url}\r\n'
+                '{headers}\r\n'
+                '\r\n{body}'
+            ).format(
+                method = lpq.method, url = lpq.url,
+                headers=self._headers_to_string(headers),
+                body=body
+            )
+            ret['last_prepared_request'] = lpq_payload
+            print(lpq_payload)
+            print()
+        except AttributeError as e:
+            msg = f"Caught {e.__class__.__name__}"
+            self.log.error(msg)
+            pprint(e)
+            raise e
+        except Exception as e:
+            msg = f"Caught {e.__class__.__name__}"
+            self.log.error(msg)
+            pprint(e)
+            raise e
+
+        try:
+            print(" --- Last Response ---")
+            lr = self.last_response
+            try:
+                body = lr.json()
+            except JSONDecodeError:
+                body = lr.text
+            headers = self._redact_sensitive_headers(lr.headers)
+            lr_payload = (
+                '[{status_code}] ({reason}) {url}\r\n'
+                '{headers}\r\n'
+                '\r\n{body}'
+            ).format(
+                status_code = lr.status_code, reason = lr.reason, url = lr.url,
+                headers=self._headers_to_string(headers),
+                body=body
+            )
+            ret['last_response'] = lr_payload
+            print(lr_payload)
+            print()
+        except AttributeError as e:
+            msg = f"Caught {e.__class__.__name__}"
+            self.log.error(msg)
+            msg = "Appears we did not get a response back from the remote endpoint."
+            self.log.error(msg)
+            pass
+        except Exception as e:
+            msg = f"Caught {e.__class__.__name__}"
+            self.log.error(msg)
+            pprint(e)
+            raise e
+
+        return ret
 
     def _getTS(format=None):
         assert format in ['utc', 'local']
