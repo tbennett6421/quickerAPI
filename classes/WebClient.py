@@ -1,14 +1,14 @@
 __code_desc__ = "A class wrapping requests providing sessions and logging"
 __code_debug__ = False
-__code_version__ = 'v1.1.3'
+__code_version__ = 'v1.1.7'
 
 ## Standard Libraries
 import os
 import logging
 import copy
+from pprint import pprint
 from datetime import datetime
 from json.decoder import JSONDecodeError
-from pprint import pprint
 import http.client as http_client
 
 ## Third-Party
@@ -64,7 +64,10 @@ class WebClient(BaseObject):
         ## Configure self vars
         self.acceptable_methods = ['GET', 'POST', 'DELETE', 'PUT']
         self.sensitive_headers = []
-        self.common_sensitive_headers = ['Authorization', 'X-OpenIDM-Password']
+        self.common_sensitive_headers = [
+            'Authorization', 'iPlanetDirectoryPro',
+            'X-OpenIDM-Password', 'X-OpenAM-Password'
+        ]
 
         ## Call parent init
         super().__init__()
@@ -355,9 +358,33 @@ class WebClient(BaseObject):
     #endregion: public methods
 
     #region: public interfaces
-    #endregion: public interfaces
 
-    #region: public interfaces
+    def get(self, url, headers=None, params=None, data=None):
+        return self._doGet(url, headers=headers, params=params, data=data)
+
+    def post(self, url, headers=None, params=None, data=None, json=None):
+        return self._doPost(url, headers=headers, params=params, data=data, json=json)
+
+    def delete(self, url, headers=None, params=None, data=None):
+        return self._doDelete(url, headers=headers, params=params, data=data)
+
+    def put(self, url, headers=None, params=None, data=None, json=None):
+        return self._doPut(url, headers=headers, params=params, data=data, json=json)
+
+    def updateHeader(self, header, value):
+        self.requestSession.headers.update({header: value})
+
+    def setHeader(self, header, value):
+        return self.updateHeader(header, value)
+
+    def getHeader(self, header):
+        try:
+            return self.requestSession.headers[header]
+        except Exception as e:
+            msg = f"Caught {e.__class__.__name__}"
+            print(msg)
+            raise e
+
     #endregion: public interfaces
 
 def demo():
