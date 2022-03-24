@@ -23,6 +23,11 @@ threat-toolbox = 'threat-toolbox.__main__:main'
 
 [tool.poetry.dependencies]
 python = "^3.8.0"
+fastapi = "^0.75.0"
+uvicorn = {extras = ["standard"], version = "^0.17.6"}
+requests = "^2.27.1"
+pyasn = "^1.6.1"
+ratelimit = "^2.2.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
