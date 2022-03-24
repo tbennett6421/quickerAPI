@@ -65,6 +65,7 @@ def log_health(app):
         else:
             fmt = "{:<15} => {: >}".format(k,return_red_str(v))
             print(fmt)
+    return health
 
 def log_exception(e):
     # @todo: implement logging

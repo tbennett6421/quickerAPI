@@ -18,11 +18,28 @@ from classes.Enumerations import frequency_tables,whois_method,whois_artifact
 from classes.freq import FreqCounter
 from classes.funcs import md5,sha1,sha256
 from classes.utils import log_health,log_exception,load_alexa,load_cisco
+#from routes.routes import list_services as ls
+
+tags_metadata = [
+    {
+        "name": "health",
+        "description": "health checks for this node.",
+    },
+    {
+        "name": "default",
+        "description": "uncategorized endpoints.",
+    },
+    {
+        "name": "whois",
+        "description": "Whois related endpoints.",
+    },
+]
 
 app = FastAPI(
     title=__code_project__,
     description=__code_desc__,
     version=__code_version__,
+    openapi_tags=tags_metadata,
 )
 
 @app.on_event("startup")
@@ -70,7 +87,7 @@ async def main():
     app.threatminer = ThreatMiner()
 
     # finished loading; dump services to stdout
-    log_health(app)
+    app.health = log_health(app)
 
 #region: routes
 
@@ -239,6 +256,35 @@ async def calculate_hashes(param: str):
         "sha1": sha1(param),
         "sha256": sha256(param),
     }
+
+@app.get("/health/", tags=['health'])
+async def list_services():
+    """
+    List all services available on this node:
+
+    At this time health is a placeholder for /services/. Health may be reused in the future for node statistics.
+
+    Examples of future uses include
+    * cpu usage
+    * memory usage
+    * cache usage
+    * load perc
+    * average response time
+    * errors, success
+
+    If you want to know about services available for the purposes of tailoring queries, you should use /services/
+    """
+    return app.health.items()
+
+@app.get("/services/", tags=['health'])
+async def list_services():
+    """ List all services available on this node. """
+    return app.health.items()
+
+# @app.get("/services/", tags=['health'])
+# async def list_services():
+#     """ List all services available on this node. """
+#     return await ls(app)
 
 # @app.get("/ip/{param}")
 # async def query_x(param: str):
