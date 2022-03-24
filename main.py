@@ -1,4 +1,4 @@
-__code_project__ = 'QuickerAPI'
+__code_project__ = 'threat-toolbox'
 __code_desc__ = "A POC/Learning exercise with FastAPI"
 __code_version__ = 'v0.0.1'
 
@@ -22,17 +22,21 @@ from classes.utils import log_health,log_exception,load_alexa,load_cisco
 
 tags_metadata = [
     {
-        "name": "health",
+        "name": "Health",
         "description": "health checks for this node.",
+    },
+    {
+        "name": "Hash Generation",
+        "description": "endpoints related to generating hashs against their arguments.",
     },
     {
         "name": "default",
         "description": "uncategorized endpoints.",
     },
-    {
-        "name": "whois",
-        "description": "Whois related endpoints.",
-    },
+    # {
+    #     "name": "whois",
+    #     "description": "Whois related endpoints.",
+    # },
 ]
 
 app = FastAPI(
@@ -230,25 +234,25 @@ async def fetch_cisco(param: str):
     else:
         raise HTTPException(status_code=500, detail="cisco umbrella not loaded")
 
-@app.get("/md5/{param}")
+@app.get("/md5/{param}", tags=['Hash Generation'])
 async def calculate_md5(param: str):
     """ Calculate MD5 for a string """
     md = md5(param)
     return { "md5": md }
 
-@app.get("/sha1/{param}")
+@app.get("/sha1/{param}", tags=['Hash Generation'])
 async def calculate_sha1(param: str):
     """ Calculate SHA1 for a string """
     md = sha1(param)
     return { "sha1": md }
 
-@app.get("/sha256/{param}")
+@app.get("/sha256/{param}", tags=['Hash Generation'])
 async def calculate_sha256(param: str):
     """ Calculate SHA256 for a string """
     md = sha256(param)
     return { "sha256": md }
 
-@app.get("/hashes/{param}")
+@app.get("/hashes/{param}", tags=['Hash Generation'])
 async def calculate_hashes(param: str):
     """ Calculate all message digests supported for a string """
     return {
@@ -257,7 +261,7 @@ async def calculate_hashes(param: str):
         "sha256": sha256(param),
     }
 
-@app.get("/health/", tags=['health'])
+@app.get("/health/", tags=['Health'])
 async def list_services():
     """
     List all services available on this node:
@@ -276,7 +280,7 @@ async def list_services():
     """
     return app.health.items()
 
-@app.get("/services/", tags=['health'])
+@app.get("/services/", tags=['Health'])
 async def list_services():
     """ List all services available on this node. """
     return app.health.items()
