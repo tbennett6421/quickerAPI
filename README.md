@@ -22,6 +22,7 @@ pip install "uvicorn[standard]"
 pip install requests
 pip install pyasn
 pip install ratelimit
+pip install ipwhois
 ```
 
 It is highly recommended you run generate_resources_and_cache.sh to pull external resources and generate databases needed for the application's various services
