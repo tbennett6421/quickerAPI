@@ -33,7 +33,7 @@ bash -x generate_resources_and_cache.sh
 # Running the solution
 ```sh
 # running the solution in development mode
-uvicorn main:app --reload
+uvicorn server:app --reload
 ```
 
 ## Viewing documentation

@@ -27,7 +27,7 @@ tags_metadata = [
     },
     {
         "name": "Hash Generation",
-        "description": "endpoints related to generating hashs against their arguments.",
+        "description": "endpoints related to generating hashes against their arguments.",
     },
     {
         "name": "default",
