@@ -44,6 +44,7 @@ uvicorn server:app --reload
 The following platforms have been tested. Others may work, feel free to add info if you get it working on other platforms
 * Microsoft Windows 10
 * Mac OS X Big Sur
+* Python 3.8.9+
 
 # Resources
 |Item|Description|
