@@ -38,12 +38,19 @@ uvicorn server:app --reload
 
 ## Viewing documentation
 * 127.0.0.1:8000/docs
-* 127.0.0.1:8000/redocs
+* 127.0.0.1:8000/redoc
+
+# Running unit tests
+```sh
+# running the solution in development mode
+pytest
+```
 
 # Supported platforms
 The following platforms have been tested. Others may work, feel free to add info if you get it working on other platforms
 * Microsoft Windows 10
 * Mac OS X Big Sur
+* Python 3.8.10+
 
 # Resources
 |Item|Description|
