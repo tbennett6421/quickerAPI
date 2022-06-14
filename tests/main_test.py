@@ -44,6 +44,20 @@ with TestClient(app) as client:
         response = client.get(f"/asn/{criteria}")
         assert response.status_code == 200
 
+    def test_read_freq():
+        criteria = "tigershell"
+
+        response = client.get(f"/frequency/{criteria}")
+        assert response.status_code == 200
+
+        params = { "table": "default" }
+        response = client.get(f"/whois/{criteria}", params=params)
+        assert response.status_code == 200
+
+        params = { "table": "domain" }
+        response = client.get(f"/whois/{criteria}", params=params)
+        assert response.status_code == 200
+
     def test_read_whois():
         criteria = "google.com"
 

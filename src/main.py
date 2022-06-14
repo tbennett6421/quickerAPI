@@ -177,6 +177,47 @@ async def fetch_cisco(param: str):
     else:
         raise HTTPException(status_code=500, detail="cisco umbrella not loaded")
 
+@app.get("/frequency/{param}")
+async def calculate_frequency(param: str, table: frequency_tables = frequency_tables.default):
+    """
+    Calculate the frequency score for some input using character pair frequency analysis:
+
+    Lower scores are more likely to be high-entropy
+
+    Two scores are returned
+    - **average probability**
+    - **word probability**
+
+    Return Codes
+    - 200: Success
+    - 500: Freq table not loaded
+    - 500: Unknown Error
+
+    """
+    try:
+        if table == frequency_tables.domain:
+            if app.freq.domain is not None:
+                x,y = app.freq.domain.fc.probability(param)
+            else:
+                raise HTTPException(status_code=500, detail="freq::domain not loaded")
+        else:
+            if app.freq.default is not None:
+                x,y = app.freq.default.fc.probability(param)
+            else:
+                raise HTTPException(status_code=500, detail="freq::default not loaded")
+        return {
+            "freq_score_avg": x,
+            "freq_score_word": y,
+        }
+    except Exception as e:
+        # Re-raise any HTTPExceptions
+        if type(e) == HTTPException:
+            raise e
+        # Otherwise log it for review and return generic
+        else:
+            log_exception(e)
+            raise HTTPException(status_code=500, detail="Internal Server Error")
+
 @app.get("/whois/{param}")
 async def fetch_whois(param: str, artifact_type: whois_artifact = whois_artifact.default, method: whois_method = whois_method.default):
     # @to-do: auto-detect artifact type
