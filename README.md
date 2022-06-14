@@ -1,4 +1,4 @@
-# quickerAPI
+# threat-toolbox
 A POC/Learning exercise with FastAPI
 
 # Installation
@@ -14,15 +14,20 @@ pip install -r requirements.txt
 ```sh
 # Manual
 pip install fastapi
+pip install pytest
 pip install "uvicorn[standard]"
 ```
 
 ```sh
 # Other dependencies
-pip install requests
-pip install pyasn
-pip install ratelimit
+pip install colorama
 pip install ipwhois
+pip install pandas
+pip install pyasn
+pip install python-whois
+pip install requests
+pip install ratelimit
+pip install termcolor
 ```
 
 It is highly recommended you run generate_resources_and_cache.sh to pull external resources and generate databases needed for the application's various services
@@ -33,16 +38,15 @@ bash -x generate_resources_and_cache.sh
 # Running the solution
 ```sh
 # running the solution in development mode
-uvicorn server:app --reload
+uvicorn main:app --reload
 ```
 
 ## Viewing documentation
 * 127.0.0.1:8000/docs
-* 127.0.0.1:8000/redoc
+* 127.0.0.1:8000/redocs
 
-# Running unit tests
+# Running unit-tests
 ```sh
-# running the solution in development mode
 pytest
 ```
 
@@ -50,7 +54,7 @@ pytest
 The following platforms have been tested. Others may work, feel free to add info if you get it working on other platforms
 * Microsoft Windows 10
 * Mac OS X Big Sur
-* Python 3.8.10+
+* Python 3.9.0+
 
 # Resources
 |Item|Description|
