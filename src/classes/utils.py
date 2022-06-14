@@ -14,6 +14,22 @@ if __code_color_support__:
     except ImportError:
         __code_color_support__ = False
 
+def print_console(msg, marker="[?]", fg_color=None, bg_color=None):
+    f_str = f"{marker} {msg}"
+    if __code_color_support__:
+        print(colored(f_str, fg_color, bg_color))
+    else:
+        print(f_str)
+
+def print_verbose(msg, marker='[*]'):
+    print_console(msg,marker, fg_color='cyan')
+
+def print_info(msg, marker='[+]'):
+    print_console(msg,marker, fg_color='green')
+
+def print_error(msg, marker='[!]'):
+    print_console(msg,marker, fg_color='white', bg_color='on_red')
+
 def return_red_str(msg):
     return colored(msg, 'white', 'on_red')
 
