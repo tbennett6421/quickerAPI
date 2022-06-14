@@ -13,11 +13,12 @@ from whois import whois
 from ipwhois import IPWhois
 
 ## Modules
-from threat_toolbox.classes.ThreatMiner import ThreatMiner
-from threat_toolbox.classes.Enumerations import frequency_tables,whois_method,whois_artifact
-from threat_toolbox.classes.freq import FreqCounter
-from threat_toolbox.classes.funcs import md5,sha1,sha256
-from threat_toolbox.classes.utils import log_health,log_exception,load_alexa,load_cisco
+from src.classes.ThreatMiner import ThreatMiner
+from src.classes.Enumerations import frequency_tables,whois_method,whois_artifact
+from src.classes.freq import FreqCounter
+from src.classes.funcs import md5,sha1,sha256
+from src.classes.utils import log_health,log_exception,load_alexa,load_cisco
+#from routes.routes import list_services as ls
 
 tags_metadata = [
     {
@@ -105,6 +106,33 @@ async def main():
 @app.get("/")
 async def read_main():
     return {"msg": "Hello World"}
+
+@app.get("/md5/{param}", tags=['Hash Generation'])
+async def calculate_md5(param: str):
+    """ Calculate MD5 for a string """
+    md = md5(param)
+    return { "md5": md }
+
+@app.get("/sha1/{param}", tags=['Hash Generation'])
+async def calculate_sha1(param: str):
+    """ Calculate SHA1 for a string """
+    md = sha1(param)
+    return { "sha1": md }
+
+@app.get("/sha256/{param}", tags=['Hash Generation'])
+async def calculate_sha256(param: str):
+    """ Calculate SHA256 for a string """
+    md = sha256(param)
+    return { "sha256": md }
+
+@app.get("/hashes/{param}", tags=['Hash Generation'])
+async def calculate_hashes(param: str):
+    """ Calculate all message digests supported for a string """
+    return {
+        "md5": md5(param),
+        "sha1": sha1(param),
+        "sha256": sha256(param),
+    }
 
 @app.get("/health/", tags=['Health'])
 async def list_services():
