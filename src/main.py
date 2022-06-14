@@ -16,8 +16,7 @@ from ipwhois import IPWhois
 from src.classes.ThreatMiner import ThreatMiner
 from src.classes.Enumerations import frequency_tables,whois_method,whois_artifact
 from src.classes.freq import FreqCounter
-from src.classes.funcs import md5,sha1,sha256
-from src.classes.utils import log_health,log_exception,load_alexa,load_cisco
+from src.classes.utils import log_health,log_exception,load_alexa,load_cisco,isIPAddress
 from src.routes import hashes
 
 tags_metadata = [
@@ -241,6 +240,22 @@ async def fetch_whois(param: str, artifact_type: whois_artifact = whois_artifact
             raise HTTPException(status_code=501, detail="Not implemented yet")
     else:
         raise HTTPException(status_code=501, detail="Not implemented yet")
+
+@app.get("/whois/ip/{param}")
+async def fetch_whois_ip(param: str, method: whois_method = None):
+    if not isIPAddress(param):
+        raise HTTPException(status_code=400, detail="Bad Request")
+    else:
+        if method == whois_method.threatminer:
+            return app.threatminer.queryIPWhois(param)
+        elif method == whois_method.whois:
+            obj = app.ip_whois(param)
+            rval = obj.lookup_rdap()
+            return rval
+        else:
+            obj = app.ip_whois(param)
+            rval = obj.lookup_rdap()
+            return rval
 
 @app.get("/health/", tags=['Health'])
 async def list_services():

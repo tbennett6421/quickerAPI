@@ -1,4 +1,3 @@
-from cgi import test
 from fastapi.testclient import TestClient
 from src.main import app
 from src.classes.funcs import md5,sha1,sha256
@@ -71,6 +70,13 @@ with TestClient(app) as client:
             "method": "whois"
         }
         response = client.get(f"/whois/{criteria}", params=params)
+        assert response.status_code == 200
+
+    def test_read_whois_ip():
+        criteria = '8.8.8.8'
+        response = client.get(f"/whois/ip/invalid.tld")
+        assert response.status_code == 400
+        response = client.get(f"/whois/ip/{criteria}",)
         assert response.status_code == 200
 
     def test_read_alexa():
