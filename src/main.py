@@ -107,6 +107,27 @@ async def main():
 async def read_main():
     return {"msg": "Hello World"}
 
+@app.get("/asn/{ip_address}", summary="Fetch ASN")
+async def fetch_asn(ip_address: str):
+    """
+    Return the ASN and BGP-Prefix of an ip address:
+
+    Return Codes
+    - 200: Success
+    - 404: Not found
+    - 500: ASN database is not loaded
+    """
+    if app.asn is not None:
+        try:
+            x, y = app.asn.lookup(ip_address)
+            return {
+                "asn": x,
+                "bgp_prefix": y,
+            }
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail="item not found")
+    else:
+        raise HTTPException(status_code=500, detail="asn database not loaded")
 
 @app.get("/alexa/{param}")
 async def fetch_alexa(param: str):
@@ -156,6 +177,28 @@ async def fetch_cisco(param: str):
     else:
         raise HTTPException(status_code=500, detail="cisco umbrella not loaded")
 
+@app.get("/whois/{param}")
+async def fetch_whois(param: str, artifact_type: whois_artifact = whois_artifact.default, method: whois_method = whois_method.default):
+    # @to-do: auto-detect artifact type
+    # whois_method.whois is a online lookup from whois binary
+    if method == whois_method.whois:
+        if artifact_type == whois_artifact.ip:
+            obj = app.ip_whois(param)
+            rval = obj.lookup_rdap()
+            return rval
+        if artifact_type == whois_artifact.domain:
+            rval = app.dns_whois(param)
+            return rval
+    if method == whois_method.threatminer:
+        if artifact_type == whois_artifact.ip:
+            return app.threatminer.queryIPWhois(param)
+        elif artifact_type == whois_artifact.domain:
+            return app.threatminer.queryDomainWhois(param)
+        else:
+            # attempt to guess at type
+            raise HTTPException(status_code=501, detail="Not implemented yet")
+    else:
+        raise HTTPException(status_code=501, detail="Not implemented yet")
 
 @app.get("/md5/{param}", tags=['Hash Generation'])
 async def calculate_md5(param: str):

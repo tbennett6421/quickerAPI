@@ -16,6 +16,8 @@ with TestClient(app) as client:
         assert response.status_code == 200
         response = client.get("/redoc")
         assert response.status_code == 200
+        response = client.get("/openapi.json")
+        assert response.status_code == 200
 
     def test_read_hashes():
         criteria = "Hello"
@@ -36,6 +38,26 @@ with TestClient(app) as client:
         response = client.get(f"/hashes/{criteria}")
         assert response.status_code == 200
         assert response.json() == hashes
+
+    def test_read_asn():
+        criteria = "8.8.8.8"
+        response = client.get(f"/asn/{criteria}")
+        assert response.status_code == 200
+
+    def test_read_whois():
+        criteria = "google.com"
+
+        # @to-do: all: default
+        response = client.get(f"/whois/{criteria}")
+        assert response.status_code == 501
+
+        # test where domain:whois lookup
+        params = {
+            "artifact_type": "domain",
+            "method": "whois"
+        }
+        response = client.get(f"/whois/{criteria}", params=params)
+        assert response.status_code == 200
 
     def test_read_alexa():
         criteria = "google.com"

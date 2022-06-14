@@ -1,4 +1,4 @@
 #!/bin/sh
 source env/bin/activate
-python -m pytest
+python -m pytest -v
 deactivate
