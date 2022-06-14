@@ -292,5 +292,37 @@ async def list_services():
     """ List all services available on this node. """
     return app.health.items()
 
+# @app.get("/services/", tags=['health'])
+# async def list_services():
+#     """ List all services available on this node. """
+#     return await ls(app)
+
+# @app.get("/ip/{param}")
+# async def query_x(param: str):
+#     raise HTTPException(status_code=501, detail="Not implemented yet")
+#     return {}
+
+# @app.get("/domain/{param}")
+# async def query_x(param: str):
+#     raise HTTPException(status_code=501, detail="Not implemented yet")
+#     return {}
+
+#@app.get("/geoip/{param}")
+#async def fetch_geoip(param: str):
+#     raise HTTPException(status_code=501, detail="Not implemented yet")
+#     return {}
+
+#@app.get("/threat/{param}")
+#async def query_threathunter(param: str):
+#     raise HTTPException(status_code=501, detail="Not implemented yet")
+#     return {}
 
 #endregion: routes
+
+#region: stubs
+
+#@app.get("/entropy/{param}")
+#async def calculate_entropy(param: str):
+#    return await calculate_frequency(param)
+
+#endregion: stubs

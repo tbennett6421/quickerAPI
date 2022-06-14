@@ -51,11 +51,11 @@ with TestClient(app) as client:
         assert response.status_code == 200
 
         params = { "table": "default" }
-        response = client.get(f"/whois/{criteria}", params=params)
+        response = client.get(f"/frequency/{criteria}", params=params)
         assert response.status_code == 200
 
         params = { "table": "domain" }
-        response = client.get(f"/whois/{criteria}", params=params)
+        response = client.get(f"/frequency/{criteria}", params=params)
         assert response.status_code == 200
 
     def test_read_whois():
