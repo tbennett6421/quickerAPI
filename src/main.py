@@ -7,7 +7,7 @@ from pprint import pprint
 
 ## Third Party libraries
 import pandas as pd
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pyasn import pyasn
 from whois import whois
 from ipwhois import IPWhois
@@ -106,6 +106,56 @@ async def main():
 @app.get("/")
 async def read_main():
     return {"msg": "Hello World"}
+
+
+@app.get("/alexa/{param}")
+async def fetch_alexa(param: str):
+    """
+    Return the ranking of the input according to the alexa top 1 million records:
+
+    Return Codes
+    - 200: Success
+    - 404: Not found
+    - 500: Alexa database is not loaded
+    """
+
+    if app.alexa is not None:
+        try:
+            df = app.alexa
+            capture = df.loc[df['domain'] == param]
+            rval = int(capture['rank'].values[0])
+            return {
+                'alexa_score': rval
+            }
+        except IndexError:
+            raise HTTPException(status_code=404, detail="item not found")
+    else:
+        raise HTTPException(status_code=500, detail="alexa not loaded")
+
+@app.get("/cisco/{param}")
+async def fetch_cisco(param: str):
+    """
+    Return the ranking of the input according to the cisco umbrella top 1 million records:
+
+    Return Codes
+    - 200: Success
+    - 404: Not found
+    - 500: Cisco database is not loaded
+    """
+
+    if app.cisco is not None:
+        try:
+            df = app.cisco
+            capture = df.loc[df['domain'] == param]
+            rval = int(capture['rank'].values[0])
+            return {
+                'cisco_score': rval
+            }
+        except IndexError:
+            raise HTTPException(status_code=404, detail="item not found")
+    else:
+        raise HTTPException(status_code=500, detail="cisco umbrella not loaded")
+
 
 @app.get("/md5/{param}", tags=['Hash Generation'])
 async def calculate_md5(param: str):

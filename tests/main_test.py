@@ -18,32 +18,34 @@ with TestClient(app) as client:
         assert response.status_code == 200
 
     def test_read_hashes():
-        test_criteria = "Hello"
+        criteria = "Hello"
         hashes = {
-            "md5": md5(test_criteria),
-            "sha1": sha1(test_criteria),
-            "sha256": sha256(test_criteria),
+            "md5": md5(criteria),
+            "sha1": sha1(criteria),
+            "sha256": sha256(criteria),
         }
-
-        # Test MD5/ endpoint
-        response = client.get(f"/md5/{test_criteria}")
+        response = client.get(f"/md5/{criteria}")
         assert response.status_code == 200
         assert response.json() == {"md5": hashes['md5']}
-
-        # Test SHA1/ endpoint
-        response = client.get(f"/sha1/{test_criteria}")
+        response = client.get(f"/sha1/{criteria}")
         assert response.status_code == 200
         assert response.json() == {"sha1": hashes['sha1']}
-
-        # Test SHA256/ endpoint
-        response = client.get(f"/sha256/{test_criteria}")
+        response = client.get(f"/sha256/{criteria}")
         assert response.status_code == 200
         assert response.json() == {"sha256": hashes['sha256']}
-
-        # Test hashes/ endpoint
-        response = client.get(f"/hashes/{test_criteria}")
+        response = client.get(f"/hashes/{criteria}")
         assert response.status_code == 200
         assert response.json() == hashes
+
+    def test_read_alexa():
+        criteria = "google.com"
+        response = client.get(f"/alexa/{criteria}")
+        assert response.status_code == 200
+
+    def test_read_cisco():
+        criteria = "google.com"
+        response = client.get(f"/cisco/{criteria}")
+        assert response.status_code == 200
 
     def test_read_health():
         response = client.get("/health/")
