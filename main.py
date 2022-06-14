@@ -13,11 +13,11 @@ from whois import whois
 from ipwhois import IPWhois
 
 ## Modules
-from classes.ThreatMiner import ThreatMiner
-from classes.Enumerations import frequency_tables,whois_method,whois_artifact
-from classes.freq import FreqCounter
-from classes.funcs import md5,sha1,sha256
-from classes.utils import log_health,log_exception,load_alexa,load_cisco
+from threat_toolbox.classes.ThreatMiner import ThreatMiner
+from threat_toolbox.classes.Enumerations import frequency_tables,whois_method,whois_artifact
+from threat_toolbox.classes.freq import FreqCounter
+from threat_toolbox.classes.funcs import md5,sha1,sha256
+from threat_toolbox.classes.utils import log_health,log_exception,load_alexa,load_cisco
 
 tags_metadata = [
     {

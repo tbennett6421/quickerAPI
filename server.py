@@ -7,17 +7,17 @@ from pprint import pprint
 
 ## Third Party libraries
 import pandas as pd
-from pyasn import pyasn
 from fastapi import FastAPI, HTTPException
-from whois import whois
 from ipwhois import IPWhois
+from pyasn import pyasn
+from whois import whois
 
+from threat_toolbox.classes.Enumerations import frequency_tables,whois_method,whois_artifact
+from threat_toolbox.classes.freq import FreqCounter
+from threat_toolbox.classes.funcs import md5,sha1,sha256
 ## Modules
-from classes.ThreatMiner import ThreatMiner
-from classes.Enumerations import frequency_tables,whois_method,whois_artifact
-from classes.freq import FreqCounter
-from classes.funcs import md5,sha1,sha256
-from classes.utils import log_health,log_exception,load_alexa,load_cisco
+from threat_toolbox.classes.ThreatMiner import ThreatMiner
+from threat_toolbox.classes.utils import log_health,log_exception,load_alexa,load_cisco
 #from routes.routes import list_services as ls
 
 tags_metadata = [
