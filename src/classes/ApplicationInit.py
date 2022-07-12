@@ -81,4 +81,4 @@ def init(app):
     app.threatminer = ThreatMiner()
 
     # finished loading; dump services to stdout
-    app.health = log_health(app)
+    app.se.health = log_health(app)

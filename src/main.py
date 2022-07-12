@@ -13,7 +13,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from src.classes.Enumerations import whois_method,whois_artifact
 from src.classes.utils import isIPAddress
 from src.classes.ApplicationInit import init
-from src.routes import alexa,asn,cisco,frequency,hashes
+from src.routes import alexa,asn,cisco,frequency,hashes,meta
 from src.classes.PrettyJSONResponse import PrettyJSONResponse
 
 tags_metadata = [
@@ -46,7 +46,7 @@ app = FastAPI(
     openapi_tags=tags_metadata,
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
-routes_to_include = [alexa, asn, cisco, frequency, hashes]
+routes_to_include = [alexa, asn, cisco, frequency, hashes, meta]
 for i in routes_to_include:
     app.include_router(i.router)
 
@@ -56,10 +56,6 @@ async def main():
     init(app)
 
 #region: routes
-@app.get("/", response_class=PrettyJSONResponse)
-async def read_main():
-    return {"msg": "Hello World"}
-
 @app.get("/whois/{param}", response_class=PrettyJSONResponse)
 async def fetch_whois(param: str, artifact_type: whois_artifact = whois_artifact.default, method: whois_method = whois_method.default):
     # @to-do: auto-detect artifact type
@@ -98,35 +94,6 @@ async def fetch_whois_ip(param: str, method: whois_method = None):
             obj = app.ip_whois(param)
             rval = obj.lookup_rdap()
             return rval
-
-@app.get("/health/", tags=['Health'], response_class=PrettyJSONResponse)
-async def list_services():
-    """
-    List all services available on this node:
-
-    At this time health is a placeholder for /services/. Health may be reused in the future for node statistics.
-
-    Examples of future uses include
-    * cpu usage
-    * memory usage
-    * cache usage
-    * load perc
-    * average response time
-    * errors, success
-
-    If you want to know about services available for the purposes of tailoring queries, you should use /services/
-    """
-    return app.health.items()
-
-@app.get("/services/", tags=['Health'], response_class=PrettyJSONResponse)
-async def list_services():
-    """ List all services available on this node. """
-    return app.health.items()
-
-# @app.get("/services/", tags=['health'])
-# async def list_services():
-#     """ List all services available on this node. """
-#     return await ls(app)
 
 # @app.get("/ip/{param}")
 # async def query_x(param: str):
