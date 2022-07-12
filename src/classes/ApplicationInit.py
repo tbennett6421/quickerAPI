@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 from pyasn import pyasn
 from whois import whois
@@ -45,8 +46,11 @@ def init_cisco(app):
 def init_pyasn(app):
     try:
         app.se.asn = pyasn('resources/ipasn.dat')
+        with open('resources/asnames.json', 'r') as read_content:
+            app.se.asnames = json.load(read_content)
     except (FileNotFoundError,OSError,NameError) as e:
         app.se.asn = None
+        app.se.asnames = None
 
 def init_whois_dns(app):
     try:

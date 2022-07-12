@@ -17,9 +17,11 @@ async def fetch_asn(ip_address: str, se: SharedEngine = Depends(SharedEngine)):
     if se.asn is not None:
         try:
             x, y = se.asn.lookup(ip_address)
+            z = se.asnames[str(x)]
             return {
                 "asn": x,
                 "bgp_prefix": y,
+                "asorg": z,
             }
         except ValueError as e:
             raise HTTPException(status_code=404, detail="item not found")
