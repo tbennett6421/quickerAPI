@@ -18,6 +18,7 @@ from src.classes.Enumerations import frequency_tables,whois_method,whois_artifac
 from src.classes.freq import FreqCounter
 from src.classes.utils import log_health,log_exception,load_alexa,load_cisco,isIPAddress
 from src.routes import hashes
+from src.classes.PrettyJSONResponse import PrettyJSONResponse
 
 tags_metadata = [
     {
@@ -102,12 +103,11 @@ async def main():
     app.health = log_health(app)
 
 #region: routes
-
-@app.get("/")
+@app.get("/", response_class=PrettyJSONResponse)
 async def read_main():
     return {"msg": "Hello World"}
 
-@app.get("/asn/{ip_address}", summary="Fetch ASN")
+@app.get("/asn/{ip_address}", summary="Fetch ASN", response_class=PrettyJSONResponse)
 async def fetch_asn(ip_address: str):
     """
     Return the ASN and BGP-Prefix of an ip address:
@@ -129,7 +129,7 @@ async def fetch_asn(ip_address: str):
     else:
         raise HTTPException(status_code=500, detail="asn database not loaded")
 
-@app.get("/alexa/{param}")
+@app.get("/alexa/{param}", response_class=PrettyJSONResponse)
 async def fetch_alexa(param: str):
     """
     Return the ranking of the input according to the alexa top 1 million records:
@@ -153,7 +153,7 @@ async def fetch_alexa(param: str):
     else:
         raise HTTPException(status_code=500, detail="alexa not loaded")
 
-@app.get("/cisco/{param}")
+@app.get("/cisco/{param}", response_class=PrettyJSONResponse)
 async def fetch_cisco(param: str):
     """
     Return the ranking of the input according to the cisco umbrella top 1 million records:
@@ -177,7 +177,7 @@ async def fetch_cisco(param: str):
     else:
         raise HTTPException(status_code=500, detail="cisco umbrella not loaded")
 
-@app.get("/frequency/{param}")
+@app.get("/frequency/{param}", response_class=PrettyJSONResponse)
 async def calculate_frequency(param: str, table: frequency_tables = frequency_tables.default):
     """
     Calculate the frequency score for some input using character pair frequency analysis:
@@ -218,7 +218,7 @@ async def calculate_frequency(param: str, table: frequency_tables = frequency_ta
             log_exception(e)
             raise HTTPException(status_code=500, detail="Internal Server Error")
 
-@app.get("/whois/{param}")
+@app.get("/whois/{param}", response_class=PrettyJSONResponse)
 async def fetch_whois(param: str, artifact_type: whois_artifact = whois_artifact.default, method: whois_method = whois_method.default):
     # @to-do: auto-detect artifact type
     # whois_method.whois is a online lookup from whois binary
@@ -241,7 +241,7 @@ async def fetch_whois(param: str, artifact_type: whois_artifact = whois_artifact
     else:
         raise HTTPException(status_code=501, detail="Not implemented yet")
 
-@app.get("/whois/ip/{param}")
+@app.get("/whois/ip/{param}", response_class=PrettyJSONResponse)
 async def fetch_whois_ip(param: str, method: whois_method = None):
     if not isIPAddress(param):
         raise HTTPException(status_code=400, detail="Bad Request")
@@ -257,7 +257,7 @@ async def fetch_whois_ip(param: str, method: whois_method = None):
             rval = obj.lookup_rdap()
             return rval
 
-@app.get("/health/", tags=['Health'])
+@app.get("/health/", tags=['Health'], response_class=PrettyJSONResponse)
 async def list_services():
     """
     List all services available on this node:
@@ -276,7 +276,7 @@ async def list_services():
     """
     return app.health.items()
 
-@app.get("/services/", tags=['Health'])
+@app.get("/services/", tags=['Health'], response_class=PrettyJSONResponse)
 async def list_services():
     """ List all services available on this node. """
     return app.health.items()
