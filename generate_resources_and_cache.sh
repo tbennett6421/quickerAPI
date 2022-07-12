@@ -27,6 +27,7 @@ pip install pyasn
 pyasn_util_download.py --latest
 for filename in rib.*.bz2; do mv "$filename" "$BASE_DIR/rib-latest.bz2"; done;
 pyasn_util_convert.py --single "$BASE_DIR/rib-latest.bz2" "$BASE_DIR/ipasn.dat"
+pyasn_util_asnames.py > "$BASE_DIR/asnames.json"
 deactivate
 rm -rf "$BASE_DIR/rib-latest.bz2"
 rm -rf scratch01tmp/

@@ -138,6 +138,7 @@ scratch01tmp/
 # files
 top-*.csv
 ipasn.dat
+asnames.json
 *.zip
 *.bz2
 *.gz
