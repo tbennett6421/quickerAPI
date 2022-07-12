@@ -16,11 +16,6 @@ with TestClient(app) as client:
         response = client.get("/openapi.json")
         assert response.status_code == 200
 
-    def test_read_asn():
-        criteria = "8.8.8.8"
-        response = client.get(f"/asn/{criteria}")
-        assert response.status_code == 200
-
     def test_read_whois():
         criteria = "google.com"
 
