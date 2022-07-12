@@ -65,8 +65,8 @@ def is_service_alive(x):
 
 def log_health(app):
     health = {
-        'freq.default': is_service_alive(app.freq.default),
-        'freq::domain': is_service_alive(app.freq.default),
+        'freq.default': is_service_alive(app.se.freq.default),
+        'freq::domain': is_service_alive(app.se.freq.default),
         'asn':          is_service_alive(app.asn),
         'alexa':        is_service_alive(app.se.alexa),
         'cisco':        is_service_alive(app.se.cisco),

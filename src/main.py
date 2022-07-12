@@ -19,7 +19,7 @@ from src.classes.ThreatMiner import ThreatMiner
 from src.classes.Enumerations import frequency_tables,whois_method,whois_artifact
 from src.classes.freq import FreqCounter
 from src.classes.utils import log_health,log_exception,load_alexa,load_cisco,isIPAddress
-from src.routes import hashes,alexa,cisco
+from src.routes import alexa,cisco,frequency,hashes
 from src.classes.PrettyJSONResponse import PrettyJSONResponse
 
 tags_metadata = [
@@ -30,6 +30,10 @@ tags_metadata = [
     {
         "name": "Hash Generation",
         "description": "endpoints related to generating hashes against their arguments.",
+    },
+    {
+        "name": "Lookup Services",
+        "description": "endpoints related to querying a resource for information.",
     },
     {
         "name": "default",
@@ -48,7 +52,7 @@ app = FastAPI(
     openapi_tags=tags_metadata,
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
-routes_to_include = [alexa, cisco, hashes]
+routes_to_include = [alexa, cisco, frequency, hashes]
 for i in routes_to_include:
     app.include_router(i.router)
 
@@ -64,19 +68,19 @@ async def main():
 
     # load database services
     app.se = SharedEngine()
-    app.freq = lambda: None
-    app.freq.default = lambda: None
-    app.freq.domain = lambda: None
-    app.freq.default.fc = FreqCounter()
-    app.freq.domain.fc = FreqCounter()
+    app.se.freq = lambda: None
+    app.se.freq.default = lambda: None
+    app.se.freq.domain = lambda: None
+    app.se.freq.default.fc = FreqCounter()
+    app.se.freq.domain.fc = FreqCounter()
     try:
-        app.freq.default.fc.load('resources/freqtable2018.freq')
+        app.se.freq.default.fc.load('resources/freqtable2018.freq')
     except (FileNotFoundError,OSError,NameError) as e:
-        app.freq.default = None
+        app.se.freq.default = None
     try:
-        app.freq.domain.fc.load('resources/domain.freq')
+        app.se.freq.domain.fc.load('resources/domain.freq')
     except (FileNotFoundError,OSError,NameError) as e:
-        app.freq.domain = None
+        app.se.freq.domain = None
     try:
         app.asn = pyasn('resources/ipasn.dat')
     except (FileNotFoundError,OSError,NameError) as e:
@@ -134,47 +138,6 @@ async def fetch_asn(ip_address: str):
             raise HTTPException(status_code=404, detail="item not found")
     else:
         raise HTTPException(status_code=500, detail="asn database not loaded")
-
-@app.get("/frequency/{param}", response_class=PrettyJSONResponse)
-async def calculate_frequency(param: str, table: frequency_tables = frequency_tables.default):
-    """
-    Calculate the frequency score for some input using character pair frequency analysis:
-
-    Lower scores are more likely to be high-entropy
-
-    Two scores are returned
-    - **average probability**
-    - **word probability**
-
-    Return Codes
-    - 200: Success
-    - 500: Freq table not loaded
-    - 500: Unknown Error
-
-    """
-    try:
-        if table == frequency_tables.domain:
-            if app.freq.domain is not None:
-                x,y = app.freq.domain.fc.probability(param)
-            else:
-                raise HTTPException(status_code=500, detail="freq::domain not loaded")
-        else:
-            if app.freq.default is not None:
-                x,y = app.freq.default.fc.probability(param)
-            else:
-                raise HTTPException(status_code=500, detail="freq::default not loaded")
-        return {
-            "freq_score_avg": x,
-            "freq_score_word": y,
-        }
-    except Exception as e:
-        # Re-raise any HTTPExceptions
-        if type(e) == HTTPException:
-            raise e
-        # Otherwise log it for review and return generic
-        else:
-            log_exception(e)
-            raise HTTPException(status_code=500, detail="Internal Server Error")
 
 @app.get("/whois/{param}", response_class=PrettyJSONResponse)
 async def fetch_whois(param: str, artifact_type: whois_artifact = whois_artifact.default, method: whois_method = whois_method.default):
