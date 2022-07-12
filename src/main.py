@@ -1,6 +1,6 @@
 __code_project__ = 'threat-toolbox'
 __code_desc__ = "A POC/Learning exercise with FastAPI"
-__code_version__ = 'v0.0.1'
+__code_version__ = 'v0.0.2'
 
 ## Standard Libraries
 from pprint import pprint
