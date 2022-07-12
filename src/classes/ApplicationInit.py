@@ -44,9 +44,9 @@ def init_cisco(app):
 
 def init_pyasn(app):
     try:
-        app.asn = pyasn('resources/ipasn.dat')
+        app.se.asn = pyasn('resources/ipasn.dat')
     except (FileNotFoundError,OSError,NameError) as e:
-        app.asn = None
+        app.se.asn = None
 
 def init_whois_dns(app):
     try:

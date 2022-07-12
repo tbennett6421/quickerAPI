@@ -13,7 +13,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from src.classes.Enumerations import whois_method,whois_artifact
 from src.classes.utils import isIPAddress
 from src.classes.ApplicationInit import init
-from src.routes import alexa,cisco,frequency,hashes
+from src.routes import alexa,asn,cisco,frequency,hashes
 from src.classes.PrettyJSONResponse import PrettyJSONResponse
 
 tags_metadata = [
@@ -46,7 +46,7 @@ app = FastAPI(
     openapi_tags=tags_metadata,
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
-routes_to_include = [alexa, cisco, frequency, hashes]
+routes_to_include = [alexa, asn, cisco, frequency, hashes]
 for i in routes_to_include:
     app.include_router(i.router)
 
@@ -59,28 +59,6 @@ async def main():
 @app.get("/", response_class=PrettyJSONResponse)
 async def read_main():
     return {"msg": "Hello World"}
-
-@app.get("/asn/{ip_address}", summary="Fetch ASN", response_class=PrettyJSONResponse)
-async def fetch_asn(ip_address: str):
-    """
-    Return the ASN and BGP-Prefix of an ip address:
-
-    Return Codes
-    - 200: Success
-    - 404: Not found
-    - 500: ASN database is not loaded
-    """
-    if app.asn is not None:
-        try:
-            x, y = app.asn.lookup(ip_address)
-            return {
-                "asn": x,
-                "bgp_prefix": y,
-            }
-        except ValueError as e:
-            raise HTTPException(status_code=404, detail="item not found")
-    else:
-        raise HTTPException(status_code=500, detail="asn database not loaded")
 
 @app.get("/whois/{param}", response_class=PrettyJSONResponse)
 async def fetch_whois(param: str, artifact_type: whois_artifact = whois_artifact.default, method: whois_method = whois_method.default):
