@@ -49,6 +49,11 @@ uvicorn main:app --reload
 ```sh
 pytest
 ```
+or
+
+```sh
+make tests
+```
 
 # Supported platforms
 The following platforms have been tested. Others may work, feel free to add info if you get it working on other platforms
