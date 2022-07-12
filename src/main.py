@@ -8,6 +8,7 @@ from pprint import pprint
 ## Third Party libraries
 import pandas as pd
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.gzip import GZipMiddleware
 from pyasn import pyasn
 from whois import whois
 from ipwhois import IPWhois
@@ -45,6 +46,7 @@ app = FastAPI(
     version=__code_version__,
     openapi_tags=tags_metadata,
 )
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.include_router(hashes.router)
 
 @app.on_event("startup")
