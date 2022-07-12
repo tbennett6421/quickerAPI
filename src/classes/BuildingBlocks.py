@@ -3,7 +3,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
-__code_version__ = 'v1.0.0'
+__code_version__ = 'v2.0.0'
 
 ## Standard Libraries
 from pprint import pprint
@@ -19,7 +19,21 @@ from pprint import pprint
 """
 class BaseObject(object):
 
-    def __init__(self, state=None):
+    def __init__(self, state=None, loglevel='INFO'):
+
+        #region: debugging handler
+        if loglevel == "DEBUG":
+            try:
+                import debugpy
+                debugpy.listen(5678)
+                print("Waiting for debugger attach")
+                debugpy.wait_for_client()
+                debugpy.breakpoint()
+                print('break on this line')
+            except ImportError:
+                pass
+        #endregion: debugging handler
+
         self.is_valid = False
         if state is None:
             self.tracking_state = False
