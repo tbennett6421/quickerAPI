@@ -37,17 +37,6 @@ with TestClient(app) as client:
         assert response.status_code == 400
         response = client.get(f"/whois/ip/{criteria}",)
         assert response.status_code == 200
-
-    def test_read_alexa():
-        criteria = "google.com"
-        response = client.get(f"/alexa/{criteria}")
-        assert response.status_code == 200
-
-    def test_read_cisco():
-        criteria = "google.com"
-        response = client.get(f"/cisco/{criteria}")
-        assert response.status_code == 200
-
     def test_read_health():
         response = client.get("/health/")
         assert response.status_code == 200
