@@ -16,9 +16,9 @@ from ipwhois import IPWhois
 ## Modules
 from src.classes.BuildingBlocks import State as SharedEngine
 from src.classes.ThreatMiner import ThreatMiner
-from src.classes.Enumerations import frequency_tables,whois_method,whois_artifact
+from src.classes.Enumerations import whois_method,whois_artifact
 from src.classes.freq import FreqCounter
-from src.classes.utils import log_health,log_exception,load_alexa,load_cisco,isIPAddress
+from src.classes.utils import log_health,load_alexa,load_cisco,isIPAddress
 from src.routes import alexa,cisco,frequency,hashes
 from src.classes.PrettyJSONResponse import PrettyJSONResponse
 
