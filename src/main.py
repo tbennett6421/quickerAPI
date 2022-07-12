@@ -14,11 +14,12 @@ from whois import whois
 from ipwhois import IPWhois
 
 ## Modules
+from src.classes.BuildingBlocks import State as SharedEngine
 from src.classes.ThreatMiner import ThreatMiner
 from src.classes.Enumerations import frequency_tables,whois_method,whois_artifact
 from src.classes.freq import FreqCounter
 from src.classes.utils import log_health,log_exception,load_alexa,load_cisco,isIPAddress
-from src.routes import hashes
+from src.routes import hashes,alexa,cisco
 from src.classes.PrettyJSONResponse import PrettyJSONResponse
 
 tags_metadata = [
@@ -47,7 +48,9 @@ app = FastAPI(
     openapi_tags=tags_metadata,
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
-app.include_router(hashes.router)
+routes_to_include = [alexa, cisco, hashes]
+for i in routes_to_include:
+    app.include_router(i.router)
 
 @app.on_event("startup")
 async def main():
@@ -60,6 +63,7 @@ async def main():
     pd.set_option('display.precision', 3)
 
     # load database services
+    app.se = SharedEngine()
     app.freq = lambda: None
     app.freq.default = lambda: None
     app.freq.domain = lambda: None
@@ -78,13 +82,13 @@ async def main():
     except (FileNotFoundError,OSError,NameError) as e:
         app.asn = None
     try:
-        app.alexa = load_alexa('resources/top-1m-alexa.csv')
+        app.se.alexa = load_alexa('resources/top-1m-alexa.csv')
     except (FileNotFoundError,OSError,NameError) as e:
-        app.alexa = None
+        app.se.alexa = None
     try:
-        app.cisco = load_cisco('resources/top-1m-cisco.csv')
+        app.se.cisco = load_cisco('resources/top-1m-cisco.csv')
     except (FileNotFoundError,OSError,NameError) as e:
-        app.cisco = None
+        app.se.cisco = None
 
     # Instantiate network services
     try:
@@ -130,54 +134,6 @@ async def fetch_asn(ip_address: str):
             raise HTTPException(status_code=404, detail="item not found")
     else:
         raise HTTPException(status_code=500, detail="asn database not loaded")
-
-@app.get("/alexa/{param}", response_class=PrettyJSONResponse)
-async def fetch_alexa(param: str):
-    """
-    Return the ranking of the input according to the alexa top 1 million records:
-
-    Return Codes
-    - 200: Success
-    - 404: Not found
-    - 500: Alexa database is not loaded
-    """
-
-    if app.alexa is not None:
-        try:
-            df = app.alexa
-            capture = df.loc[df['domain'] == param]
-            rval = int(capture['rank'].values[0])
-            return {
-                'alexa_score': rval
-            }
-        except IndexError:
-            raise HTTPException(status_code=404, detail="item not found")
-    else:
-        raise HTTPException(status_code=500, detail="alexa not loaded")
-
-@app.get("/cisco/{param}", response_class=PrettyJSONResponse)
-async def fetch_cisco(param: str):
-    """
-    Return the ranking of the input according to the cisco umbrella top 1 million records:
-
-    Return Codes
-    - 200: Success
-    - 404: Not found
-    - 500: Cisco database is not loaded
-    """
-
-    if app.cisco is not None:
-        try:
-            df = app.cisco
-            capture = df.loc[df['domain'] == param]
-            rval = int(capture['rank'].values[0])
-            return {
-                'cisco_score': rval
-            }
-        except IndexError:
-            raise HTTPException(status_code=404, detail="item not found")
-    else:
-        raise HTTPException(status_code=500, detail="cisco umbrella not loaded")
 
 @app.get("/frequency/{param}", response_class=PrettyJSONResponse)
 async def calculate_frequency(param: str, table: frequency_tables = frequency_tables.default):

@@ -68,8 +68,8 @@ def log_health(app):
         'freq.default': is_service_alive(app.freq.default),
         'freq::domain': is_service_alive(app.freq.default),
         'asn':          is_service_alive(app.asn),
-        'alexa':        is_service_alive(app.alexa),
-        'cisco':        is_service_alive(app.cisco),
+        'alexa':        is_service_alive(app.se.alexa),
+        'cisco':        is_service_alive(app.se.cisco),
         'ip_whois':     is_service_alive(app.ip_whois),
         'dns_whois':    is_service_alive(app.dns_whois),
     }
