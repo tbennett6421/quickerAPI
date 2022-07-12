@@ -6,19 +6,13 @@ __code_version__ = 'v0.0.1'
 from pprint import pprint
 
 ## Third Party libraries
-import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.gzip import GZipMiddleware
-from pyasn import pyasn
-from whois import whois
-from ipwhois import IPWhois
 
 ## Modules
-from src.classes.BuildingBlocks import State as SharedEngine
-from src.classes.ThreatMiner import ThreatMiner
 from src.classes.Enumerations import whois_method,whois_artifact
-from src.classes.freq import FreqCounter
-from src.classes.utils import log_health,load_alexa,load_cisco,isIPAddress
+from src.classes.utils import isIPAddress
+from src.classes.ApplicationInit import init
 from src.routes import alexa,cisco,frequency,hashes
 from src.classes.PrettyJSONResponse import PrettyJSONResponse
 
@@ -59,58 +53,7 @@ for i in routes_to_include:
 @app.on_event("startup")
 async def main():
     """ On startup, load components """
-    ## Configure pandas display
-    pd.set_option('display.max_rows', 5)
-    pd.set_option('display.max_columns', 5)
-    pd.set_option('display.width', 1000)
-    pd.set_option('display.colheader_justify', 'center')
-    pd.set_option('display.precision', 3)
-
-    # load database services
-    app.se = SharedEngine()
-    app.se.freq = lambda: None
-    app.se.freq.default = lambda: None
-    app.se.freq.domain = lambda: None
-    app.se.freq.default.fc = FreqCounter()
-    app.se.freq.domain.fc = FreqCounter()
-    try:
-        app.se.freq.default.fc.load('resources/freqtable2018.freq')
-    except (FileNotFoundError,OSError,NameError) as e:
-        app.se.freq.default = None
-    try:
-        app.se.freq.domain.fc.load('resources/domain.freq')
-    except (FileNotFoundError,OSError,NameError) as e:
-        app.se.freq.domain = None
-    try:
-        app.asn = pyasn('resources/ipasn.dat')
-    except (FileNotFoundError,OSError,NameError) as e:
-        app.asn = None
-    try:
-        app.se.alexa = load_alexa('resources/top-1m-alexa.csv')
-    except (FileNotFoundError,OSError,NameError) as e:
-        app.se.alexa = None
-    try:
-        app.se.cisco = load_cisco('resources/top-1m-cisco.csv')
-    except (FileNotFoundError,OSError,NameError) as e:
-        app.se.cisco = None
-
-    # Instantiate network services
-    try:
-        app.dns_whois = whois
-    except (OSError,NameError) as e:
-        app.dns_whois = None
-        raise e
-    try:
-        app.ip_whois = IPWhois
-    except (OSError,NameError) as e:
-        app.ip_whois = None
-        raise e
-
-    # Instantiate api services
-    app.threatminer = ThreatMiner()
-
-    # finished loading; dump services to stdout
-    app.health = log_health(app)
+    init(app)
 
 #region: routes
 @app.get("/", response_class=PrettyJSONResponse)
