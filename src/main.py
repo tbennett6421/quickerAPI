@@ -3,11 +3,19 @@ __code_desc__ = "A POC/Learning exercise with FastAPI"
 __code_version__ = 'v0.0.2'
 
 ## Standard Libraries
-from pprint import pprint
+import os, sys
+from pprint import pprint as p
 
 ## Third Party libraries
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.gzip import GZipMiddleware
+
+## Configure sys.path
+abs = os.path.abspath(__file__)
+pwd = os.path.dirname(abs)
+ppwd = os.path.dirname(pwd)
+sys.path.insert(0, pwd)         # prepend classes\ to syspath
+sys.path.insert(0, ppwd)        # prepend src\ to syspath
 
 ## Modules
 from src.classes.Enumerations import whois_method,whois_artifact

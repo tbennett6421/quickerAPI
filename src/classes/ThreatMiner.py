@@ -12,8 +12,8 @@ from fastapi import HTTPException
 
 ## Modules
 try:
-    from .WebClient import WebClient
-    from .utils import isIPAddress
+    from src.classes.WebClient import WebClient
+    from src.classes.utils import isIPAddress
 except ImportError:
     from WebClient import WebClient
     from utils import isIPAddress

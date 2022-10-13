@@ -1,15 +1,18 @@
 __code_desc__ = "A class wrapping requests providing sessions and logging"
 __code_debug__ = False
-__code_version__ = 'v1.1.7'
+__code_version__ = 'v2.2.1'
 
 ## Standard Libraries
-import os
 import logging
 import copy
 from pprint import pprint
 from datetime import datetime
-from json.decoder import JSONDecodeError
 import http.client as http_client
+try:
+    # JSONDecodeError derives from ValueError in 3.5+; handle legacy python
+    from json.decoder import JSONDecodeError
+except ImportError:
+    JSONDecodeError = ValueError
 
 ## Third-Party
 import requests
@@ -17,9 +20,11 @@ import urllib3
 
 ## Modules
 try:
-    from .BuildingBlocks import BaseObject
+    from classes.Base import configureTLSValidation
+    from classes.BuildingBlocks import BaseObject
 except ImportError:
-    from BuildingBlocks import BaseObject
+    from .Base import configureTLSValidation
+    from .BuildingBlocks import BaseObject
 
 class WebClient(BaseObject):
     """
@@ -47,7 +52,7 @@ class WebClient(BaseObject):
 
     #region: internal methods
 
-    def __init__(self, loglevel='INFO'):
+    def __init__(self, loglevel='INFO', disable_verification=False):
         ## Prepare object
         self._setProps()
         ## Configure logging
@@ -59,7 +64,7 @@ class WebClient(BaseObject):
         ## Disable TLS warnings
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         ## Configure TLS
-        self._configureTLSValidation(disable_verification=False)
+        self._configureTLSValidation(disable_verification=disable_verification)
 
         ## Configure self vars
         self.acceptable_methods = ['GET', 'POST', 'DELETE', 'PUT']
@@ -74,6 +79,11 @@ class WebClient(BaseObject):
 
     """ Ensure keys are set to avoid throwing attributeError, also perform class init """
     def _setProps(self):
+        """ Ensure keys are set to avoid throwing attributeError, also perform class init """
+        try:
+            super()._setProps()
+        except AttributeError:
+            pass
         self.is_valid = False
         self.requestSession = requests.Session()
         none_keys = [
@@ -96,40 +106,10 @@ class WebClient(BaseObject):
         where the TLS for a given system/service is self-signed.
     """
     def _configureTLSValidation(self, disable_verification=False):
-        if disable_verification:
-            self.tls_bundle = False
-            self.verify = False
-            return
-
-        env_hunt_paths = ["REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE", "SSL_CERT_FILE"]
-        file_hunt_paths = [
-            "/etc/pki/tls/certs/ca-bundle.crt",         # RHEL
-            "/etc/ssl/certs/ca-certificates.crt",       # WSL
-            "/etc/ssl/cert.pem",                        # OSX
-        ]
-        self.tls_bundle = None
-        self.verify = None
-        # First attempt to probe environment
-        for e in env_hunt_paths:
-            try:
-                self.tls_bundle = os.environ[e]
-                self.verify = True
-                return
-            except KeyError:
-                pass
-
-        # if probing env fails, probe filesystem
-        if not self.verify:
-            for f in file_hunt_paths:
-                if os.path.isfile(f):
-                    self.tls_bundle = f
-                    self.verify = True
-                    return
-
-        # all else fails, use system
-        if not self.verify:
-            self.verify = True
-            self.tls_bundle = True
+        verify, tls_bundle = configureTLSValidation(disable_verification=disable_verification)
+        self.verify = verify
+        self.tls_bundle = tls_bundle
+        return
 
     def _headers_to_string(self, headers):
         return '\r\n'.join('{}: {}'.format(k, v) for k, v in headers.items())
@@ -177,12 +157,12 @@ class WebClient(BaseObject):
             print(lpq_payload)
             print()
         except AttributeError as e:
-            msg = f"Caught {e.__class__.__name__}"
+            msg = "Caught %s" % (e.__class__.__name__)
             self.log.error(msg)
             pprint(e)
             raise e
         except Exception as e:
-            msg = f"Caught {e.__class__.__name__}"
+            msg = "Caught %s" % (e.__class__.__name__)
             self.log.error(msg)
             pprint(e)
             raise e
@@ -208,12 +188,12 @@ class WebClient(BaseObject):
             print(lpq_payload)
             print()
         except AttributeError as e:
-            msg = f"Caught {e.__class__.__name__}"
+            msg = "Caught %s" % (e.__class__.__name__)
             self.log.error(msg)
             pprint(e)
             raise e
         except Exception as e:
-            msg = f"Caught {e.__class__.__name__}"
+            msg = "Caught %s" % (e.__class__.__name__)
             self.log.error(msg)
             pprint(e)
             raise e
@@ -239,13 +219,13 @@ class WebClient(BaseObject):
             print(lr_payload)
             print()
         except AttributeError as e:
-            msg = f"Caught {e.__class__.__name__}"
+            msg = "Caught %s" % (e.__class__.__name__)
             self.log.error(msg)
             msg = "Appears we did not get a response back from the remote endpoint."
             self.log.error(msg)
             pass
         except Exception as e:
-            msg = f"Caught {e.__class__.__name__}"
+            msg = "Caught %s" % (e.__class__.__name__)
             self.log.error(msg)
             pprint(e)
             raise e
@@ -381,7 +361,7 @@ class WebClient(BaseObject):
         try:
             return self.requestSession.headers[header]
         except Exception as e:
-            msg = f"Caught {e.__class__.__name__}"
+            msg = "Caught %s" % (e.__class__.__name__)
             print(msg)
             raise e
 

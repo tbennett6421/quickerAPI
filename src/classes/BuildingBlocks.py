@@ -3,19 +3,19 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
-__code_version__ = 'v2.0.0'
+__code_version__ = 'v3.1.1'
 
 ## Standard Libraries
 from pprint import pprint
-# import pickle
-# import hashlib
-# try:
-#     import jsonpickle as json
-# except ImportError:
-#     import json
+
+## Modules
+try:
+    from classes.Exceptions import ValidationFailedError
+except ImportError:
+    from Exceptions import ValidationFailedError
 
 """
- BaseObject provides a template of useful methods for all classes to inherit
+    BaseObject provides a template of useful methods for all classes to inherit
 """
 class BaseObject(object):
 
@@ -44,14 +44,27 @@ class BaseObject(object):
             else:
                 raise TypeError("state argument was not instance of <State>")
 
+    def AnyElementIsNone(self, lst):
+        """
+            Check a provided list if any element is None; Used for validation checks
+            Return:
+                True is anything in the list is None
+                False if all checks proceeded successfully
+        """
+        try:
+            for k in lst:
+                attr = getattr(self, k)
+                if attr is None:
+                    return True
+            return False
+        except KeyError as e:
+            print(e)
+            return True
+        except Exception as e:
+            raise e
+
     def keys(self):
         return list(self.meta().keys())
-
-    def vals(self):
-        return list(self.meta().values())
-
-    def values(self):
-        return self.vals()
 
     def meta(self):
         try:
@@ -63,13 +76,43 @@ class BaseObject(object):
         if throw:
             if not self.is_valid:
                 if message is None:
-                    raise ValueError("Unable to successfully instantiate object of class::"+self.__class__.__name__)
+                    raise ValidationFailedError("Unable to successfully instantiate object of class::"+self.__class__.__name__)
                 else:
-                    raise ValueError(message)
+                    raise ValidationFailedError(message)
             else:
                 return self.is_valid
         else:
             return self.is_valid
+
+    def vals(self):
+        return list(self.meta().values())
+
+    def values(self):
+        return self.vals()
+
+    def getProp(self, prop=None):
+        try:
+            gs = self.gs_fn
+        except AttributeError:
+            self.gs_fn = None
+        except Exception as e:
+            print(e.__name__)
+            print(e)
+            raise e
+
+        if prop not in self.keys():
+            # do we have access to a gs_fn?
+            if self.gs_fn is not None:
+                gs = self.gs_fn[prop]
+                get = gs[0]
+                return get()
+            else:
+                raise ValueError(str(prop)+" is not a valid property to get()")
+        else:
+            return getattr(self, prop)
+
+    def getParam(self, param=None):
+        return self.getProp(param)
 
     # def frozen(self):
     #     try:
@@ -111,18 +154,9 @@ class BaseObject(object):
     #     except:
     #         raise
 
-    def getProp(self, prop=None):
-        if prop not in self.keys():
-            raise ValueError(str(prop)+" is not a valid property to get()")
-        else:
-            return getattr(self, prop)
-
-    def getParam(self, param=None):
-        return self.getProp(param)
-
 """
- Borg provides a way to implement trivial Singletons, rather then sharing an
- object the borg provides any number of objects with the same internal data
+    Borg provides a way to implement trivial Singletons, rather than sharing an
+    object the borg provides any number of objects with the same internal data
 """
 class Borg(BaseObject):
     __shared_state = {}
@@ -132,8 +166,8 @@ class Borg(BaseObject):
         super().__init__()
 
 """
- This class is designed to store the program state in a fashion to be used via
- multiple modules and provides a singleton-like way to access the state of the program
+    This class is designed to store the program state in a fashion to be used via
+    multiple modules and provides a singleton-like way to access the state of the program
 """
 class State(Borg):
     def __init__(self):
